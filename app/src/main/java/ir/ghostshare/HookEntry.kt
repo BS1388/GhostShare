@@ -1,10 +1,6 @@
 package ir.ghostshare
 
 import android.app.Activity
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.ClipDescription
@@ -12,7 +8,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Binder
 import android.os.Build
@@ -47,8 +42,6 @@ class HookEntry : IXposedHookLoadPackage {
 
     companion object {
         private const val TAG = "GhostShare"
-        private const val CHANNEL_ID = "ghostshare_silent_restore_v1"
-        private const val NOTIF_ID = 7001
 
         @Volatile
         private var systemContext: Context? = null
@@ -78,15 +71,6 @@ class HookEntry : IXposedHookLoadPackage {
 
         // پرچم محلی ترد جهت جلوگیری از لوپ تودرتو؛ با remove() در بلاک finally پاک‌سازی کامل می‌شود
         private val isProcessing = ThreadLocal<Boolean>()
-
-        // تسک مشخص جهت بستن اعلان بدون تداخل با تسک‌های دیگر روی ترد اصلی سیستم
-        private val cancelNotificationRunnable = Runnable {
-            try {
-                val ctx = systemContext
-                val nm = ctx?.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-                nm?.cancel(NOTIF_ID)
-            } catch (_: Throwable) {}
-        }
 
         // مقداردهی ایمن و تنبل Handler بدون ریسک ExceptionInInitializerError در لود Zygote
         @Volatile
@@ -119,7 +103,7 @@ class HookEntry : IXposedHookLoadPackage {
 
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         // ۱. هوک اپلیکیشن خود ماژول جهت سنجش آنی فعال‌سازی در LSPosed
-        if (lpparam.packageName == "ir.ghostshare") {
+        if (lpparam.packageName == "ir.ghostshare" || lpparam.packageName == "io.github.bs1388.ghostshare") {
             hookGhostShareApp(lpparam)
             return
         }
@@ -364,7 +348,7 @@ class HookEntry : IXposedHookLoadPackage {
                 XposedBridge.hookAllMethods(serviceClass, "clipboardAccessAllowed", object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         try {
-                            val isGhostShare = param.args.any { it is String && it == "ir.ghostshare" }
+                            val isGhostShare = param.args.any { it is String && (it == "ir.ghostshare" || it == "io.github.bs1388.ghostshare") }
                             if (isGhostShare) {
                                 param.result = true
                             }
@@ -443,6 +427,7 @@ class HookEntry : IXposedHookLoadPackage {
         val clipLabel = description?.label?.toString()
 
         if (callingPackage == "ir.ghostshare" ||
+            callingPackage == "io.github.bs1388.ghostshare" ||
             clipLabel == Constants.LABEL_RESTORED_LINK ||
             extras?.getBoolean(Constants.EXTRA_BYPASS_CLEAN, false) == true) {
             XposedBridge.log("[$TAG] Restored clip detected. Preserving without cleaning or notifications.")
@@ -499,7 +484,7 @@ class HookEntry : IXposedHookLoadPackage {
     }
 
     private fun handleAppSetPrimaryClip(param: XC_MethodHook.MethodHookParam, packageName: String) {
-        if (packageName == "ir.ghostshare") return
+        if (packageName == "ir.ghostshare" || packageName == "io.github.bs1388.ghostshare") return
         if (isProcessing.get() == true) return
         try {
             isProcessing.set(true)
@@ -537,7 +522,7 @@ class HookEntry : IXposedHookLoadPackage {
     }
 
     private fun handleAppSetText(param: XC_MethodHook.MethodHookParam, packageName: String) {
-        if (packageName == "ir.ghostshare") return
+        if (packageName == "ir.ghostshare" || packageName == "io.github.bs1388.ghostshare") return
         if (isProcessing.get() == true) return
         try {
             isProcessing.set(true)
@@ -561,47 +546,29 @@ class HookEntry : IXposedHookLoadPackage {
      * ارسال تضمینی اعلان بازیابی:
      * - با پاک‌سازی هویت بایندر (Binder.clearCallingIdentity()) تا محدودیت‌های UID کلاینت برطرف شود.
      * - با اینتنت صریح (Explicit Intent) همراه با پرچم‌های فورگراند و IncludeStoppedPackages جهت بیدارباش گیرنده.
-     * - نمایش مستقیم از system_server در صورت عدم دسترسی به برودکست.
+     * - ارسال منحصراً به کامپوننت NotificationReceiver برنامه GhostShare تا فقط و فقط یک اعلان با کانتکست
+     *   و زبان انتخابی برنامه نمایش یابد و هیچ اعلانی از سمت Android System ارسال نشود.
      */
     private fun dispatchRestoreNotification(thisObject: Any?, originalText: String, callingPackage: String) {
         val token = Binder.clearCallingIdentity()
         try {
             ensureSystemContext(thisObject)
+            val ctx = systemContext ?: getContextFromObject(thisObject) ?: return
 
-            val explicitIntent = Intent(Constants.ACTION_SHOW_NOTIFICATION).apply {
-                setClassName("ir.ghostshare", "ir.ghostshare.NotificationReceiver")
-                addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                putExtra(Constants.EXTRA_ORIGINAL_LINK, originalText)
-                putExtra(Constants.EXTRA_CALLING_PACKAGE, callingPackage)
-            }
-
-            var broadcastSent = false
-            systemContext?.let { ctx ->
+            val targetPackages = listOf("io.github.bs1388.ghostshare", "ir.ghostshare")
+            for (pkg in targetPackages) {
                 try {
+                    val explicitIntent = Intent(Constants.ACTION_SHOW_NOTIFICATION).apply {
+                        setClassName(pkg, "ir.ghostshare.NotificationReceiver")
+                        addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                        addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                        putExtra(Constants.EXTRA_ORIGINAL_LINK, originalText)
+                        putExtra(Constants.EXTRA_CALLING_PACKAGE, callingPackage)
+                    }
                     ctx.sendBroadcast(explicitIntent)
-                    broadcastSent = true
-                    XposedBridge.log("[$TAG] Dispatched explicit restore notification broadcast to ir.ghostshare")
+                    XposedBridge.log("[$TAG] Dispatched restore notification broadcast exclusively to $pkg")
                 } catch (t: Throwable) {
-                    XposedBridge.log("[$TAG] Failed to send broadcast from systemContext: ${t.message}")
-                }
-            }
-
-            if (!broadcastSent) {
-                // تلاش با کانتکست کلاینت در لایه برنامه‌ها
-                val ctx = getContextFromObject(thisObject)
-                if (ctx != null) {
-                    try {
-                        ctx.sendBroadcast(explicitIntent)
-                        broadcastSent = true
-                    } catch (_: Throwable) {}
-                }
-            }
-
-            // فال‌بک مستقیم در هسته سیستم‌سرور در صورتی که برودکست ارسال نشد
-            if (!broadcastSent) {
-                systemContext?.let { ctx ->
-                    showRestoreNotification(ctx, originalText, callingPackage)
+                    XposedBridge.log("[$TAG] Failed to send broadcast to $pkg: ${t.message}")
                 }
             }
         } catch (t: Throwable) {
@@ -772,12 +739,33 @@ class HookEntry : IXposedHookLoadPackage {
                                     if (!original.isNullOrEmpty()) {
                                         recordRestoredText(original)
 
-                                        // لغو فوری اعلان با Runnable هدفمند
-                                        getMainHandler()?.removeCallbacks(cancelNotificationRunnable)
+                                        // بازگردانی مستقیم و قطعی به کلیپ‌بورد در هسته سیستم‌عامل
                                         try {
-                                            val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-                                            nm?.cancel(NOTIF_ID)
-                                        } catch (_: Throwable) {}
+                                            val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                                            val clipData = ClipData.newPlainText(Constants.LABEL_RESTORED_LINK, original)
+                                            val bypassExtras = PersistableBundle().apply {
+                                                putBoolean(Constants.EXTRA_BYPASS_CLEAN, true)
+                                            }
+                                            clipData.description.extras = bypassExtras
+                                            cm?.setPrimaryClip(clipData)
+                                            XposedBridge.log("[$TAG] Successfully restored original link to clipboard from system_server")
+                                        } catch (t: Throwable) {
+                                            XposedBridge.log("[$TAG] Failed to restore clip in system_server: ${t.message}")
+                                        }
+
+                                        // ارسال برودکست به برنامه جهت نمایش Toast تاییدیه (فقط در صورتی که برودکست از خود برنامه نیامده باشد)
+                                        if (!intent.getBooleanExtra("from_app", false)) {
+                                            for (pkg in listOf("io.github.bs1388.ghostshare", "ir.ghostshare")) {
+                                                try {
+                                                    val toastIntent = Intent(Constants.ACTION_RESTORE_CLIPBOARD).apply {
+                                                        setClassName(pkg, "ir.ghostshare.NotificationReceiver")
+                                                        putExtra(Constants.EXTRA_ORIGINAL_LINK, original)
+                                                        putExtra("from_system", true)
+                                                    }
+                                                    ctx.sendBroadcast(toastIntent)
+                                                } catch (_: Throwable) {}
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -806,32 +794,34 @@ class HookEntry : IXposedHookLoadPackage {
     }
 
     private fun loadSettingsFromApp(ctx: Context): Boolean {
-        try {
-            val appCtx = ctx.createPackageContext("ir.ghostshare", Context.CONTEXT_IGNORE_SECURITY)
-            val sp = appCtx.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
-            if (sp.contains(Constants.PREF_SHOW_RESTORE_NOTIFICATION)) {
-                return sp.getBoolean(Constants.PREF_SHOW_RESTORE_NOTIFICATION, true)
-            }
-        } catch (_: Throwable) {}
+        for (pkg in listOf("io.github.bs1388.ghostshare", "ir.ghostshare")) {
+            try {
+                val appCtx = ctx.createPackageContext(pkg, Context.CONTEXT_IGNORE_SECURITY)
+                val sp = appCtx.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+                if (sp.contains(Constants.PREF_SHOW_RESTORE_NOTIFICATION)) {
+                    return sp.getBoolean(Constants.PREF_SHOW_RESTORE_NOTIFICATION, true)
+                }
+            } catch (_: Throwable) {}
 
-        try {
-            val paths = listOf(
-                "/data/user/0/ir.ghostshare/shared_prefs/${Constants.PREFS_NAME}.xml",
-                "/data/data/ir.ghostshare/shared_prefs/${Constants.PREFS_NAME}.xml"
-            )
-            for (path in paths) {
-                val file = File(path)
-                if (file.exists() && file.canRead()) {
-                    val text = file.readText()
-                    if (text.contains("name=\"${Constants.PREF_SHOW_RESTORE_NOTIFICATION}\" value=\"false\"")) {
-                        return false
-                    }
-                    if (text.contains("name=\"${Constants.PREF_SHOW_RESTORE_NOTIFICATION}\" value=\"true\"")) {
-                        return true
+            try {
+                val paths = listOf(
+                    "/data/user/0/$pkg/shared_prefs/${Constants.PREFS_NAME}.xml",
+                    "/data/data/$pkg/shared_prefs/${Constants.PREFS_NAME}.xml"
+                )
+                for (path in paths) {
+                    val file = File(path)
+                    if (file.exists() && file.canRead()) {
+                        val text = file.readText()
+                        if (text.contains("name=\"${Constants.PREF_SHOW_RESTORE_NOTIFICATION}\" value=\"false\"")) {
+                            return false
+                        }
+                        if (text.contains("name=\"${Constants.PREF_SHOW_RESTORE_NOTIFICATION}\" value=\"true\"")) {
+                            return true
+                        }
                     }
                 }
-            }
-        } catch (_: Throwable) {}
+            } catch (_: Throwable) {}
+        }
 
         return true
     }
@@ -878,98 +868,5 @@ class HookEntry : IXposedHookLoadPackage {
                 }
             }
         } catch (_: Throwable) {}
-    }
-
-    private fun showRestoreNotification(ctx: Context, originalText: String, callingPackage: String) {
-        try {
-            val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                try {
-                    nm.deleteNotificationChannel("ghostshare_clipboard")
-                    nm.deleteNotificationChannel("ghostshare_clipboard_v2")
-                } catch (_: Throwable) {}
-
-                val channel = NotificationChannel(
-                    CHANNEL_ID,
-                    "GhostShare - اعلان بازیابی لینک",
-                    NotificationManager.IMPORTANCE_LOW
-                ).apply {
-                    description = "اعلان سایلنت بازیابی لینک پاک‌سازی شده در پنل اعلان‌ها"
-                    enableVibration(false)
-                    setSound(null, null)
-                    setShowBadge(false)
-                }
-                nm.createNotificationChannel(channel)
-            }
-
-            val restoreBroadcastIntent = Intent(Constants.ACTION_RESTORE_CLIPBOARD).apply {
-                setPackage("android")
-                putExtra(Constants.EXTRA_ORIGINAL_LINK, originalText)
-            }
-
-            val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            val restorePendingIntent = PendingIntent.getBroadcast(
-                ctx,
-                NOTIF_ID + 1,
-                restoreBroadcastIntent,
-                flags
-            )
-
-            val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Notification.Builder(ctx, CHANNEL_ID)
-            } else {
-                @Suppress("DEPRECATION")
-                Notification.Builder(ctx)
-            }
-
-            val contentText = if (callingPackage.isNotEmpty() && callingPackage != "unknown") {
-                "پارامترهای رهگیری حذف شدند ($callingPackage)."
-            } else {
-                "پارامترهای رهگیری از کلیپ‌بورد حذف شدند."
-            }
-
-            val actionTitle = "بازگرداندن"
-            val actionIcon = android.R.drawable.ic_menu_revert
-            val restoreAction = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val icon = Icon.createWithResource(ctx, actionIcon)
-                Notification.Action.Builder(icon, actionTitle, restorePendingIntent).build()
-            } else {
-                @Suppress("DEPRECATION")
-                Notification.Action.Builder(actionIcon, actionTitle, restorePendingIntent).build()
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                try {
-                    val icon = Icon.createWithResource("ir.ghostshare", R.drawable.ic_notification_ghost)
-                    builder.setSmallIcon(icon)
-                } catch (_: Throwable) {
-                    builder.setSmallIcon(android.R.drawable.ic_menu_share)
-                }
-            } else {
-                builder.setSmallIcon(android.R.drawable.ic_menu_share)
-            }
-
-            val notification = builder
-                .setContentTitle("لینک پاک‌سازی شد (GhostShare)")
-                .setContentText(contentText)
-                .setColor(0xFF00629E.toInt())
-                .setPriority(Notification.PRIORITY_LOW)
-                .setSound(null)
-                .setVibrate(null)
-                .setCategory(Notification.CATEGORY_STATUS)
-                .addAction(restoreAction)
-                .setContentIntent(restorePendingIntent)
-                .setAutoCancel(true)
-                .setTimeoutAfter(5000L)
-                .build()
-
-            nm.notify(NOTIF_ID, notification)
-
-            getMainHandler()?.removeCallbacks(cancelNotificationRunnable)
-            getMainHandler()?.postDelayed(cancelNotificationRunnable, 5000L)
-        } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Failed to display system notification: ${t.message}")
-        }
     }
 }

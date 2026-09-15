@@ -56,6 +56,12 @@ class NotificationReceiver : BroadcastReceiver() {
                 val isEnabled = prefs.getBoolean(Constants.PREF_SHOW_RESTORE_NOTIFICATION, true)
                 if (!isEnabled) return
 
+                val localizedCtx = try {
+                    LocaleHelper.wrapContext(ctx)
+                } catch (_: Throwable) {
+                    ctx
+                }
+
                 val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -67,10 +73,10 @@ class NotificationReceiver : BroadcastReceiver() {
 
                     val channel = NotificationChannel(
                         CHANNEL_ID,
-                        "GhostShare - اعلان بازیابی لینک",
+                        localizedCtx.getString(R.string.notif_channel_name),
                         NotificationManager.IMPORTANCE_LOW
                     ).apply {
-                        description = "اعلان سایلنت بازیابی لینک پاک‌سازی شده در پنل اعلان‌ها"
+                        description = localizedCtx.getString(R.string.notif_channel_desc)
                         enableVibration(false)
                         setSound(null, null)
                         setShowBadge(false)
@@ -93,9 +99,9 @@ class NotificationReceiver : BroadcastReceiver() {
                 )
 
                 val contentText = if (callingPackage.isNotEmpty() && callingPackage != "unknown") {
-                    "پارامترهای رهگیری حذف شدند ($callingPackage)."
+                    localizedCtx.getString(R.string.notif_text_with_package, callingPackage)
                 } else {
-                    "پارامترهای رهگیری از کلیپ‌بورد حذف شدند."
+                    localizedCtx.getString(R.string.notif_text_generic)
                 }
 
                 val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -105,11 +111,11 @@ class NotificationReceiver : BroadcastReceiver() {
                     Notification.Builder(ctx)
                 }
 
-                // ساخت دکمه مستقیم «بازگرداندن» روی اعلان
-                val actionTitle = "بازگرداندن"
+                // ساخت دکمه مستقیم «بازگرداندن» روی اعلان با ارجاع معتبر به پکیج android
+                val actionTitle = localizedCtx.getString(R.string.action_restore)
                 val actionIcon = android.R.drawable.ic_menu_revert
                 val restoreAction = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    val icon = Icon.createWithResource(ctx, actionIcon)
+                    val icon = Icon.createWithResource("android", actionIcon)
                     Notification.Action.Builder(icon, actionTitle, restorePendingIntent).build()
                 } else {
                     @Suppress("DEPRECATION")
@@ -117,7 +123,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 }
 
                 val notification = builder
-                    .setContentTitle("لینک پاک‌سازی شد (GhostShare)")
+                    .setContentTitle(localizedCtx.getString(R.string.notif_title))
                     .setContentText(contentText)
                     .setSmallIcon(R.drawable.ic_notification_ghost)
                     .setColor(0xFF00629E.toInt())
@@ -178,18 +184,22 @@ class NotificationReceiver : BroadcastReceiver() {
                         cm?.setPrimaryClip(clipData)
                     } catch (_: Throwable) {}
 
-                    // ۳. اطلاع‌رسانی به هسته سیستم‌سرور جهت همگام‌سازی کش و لغو اعلان در سطح سیستم
-                    try {
-                        val syncIntent = Intent(Constants.ACTION_RESTORE_CLIPBOARD).apply {
-                            setPackage("android")
-                            putExtra(Constants.EXTRA_ORIGINAL_LINK, originalText)
-                        }
-                        context.sendBroadcast(syncIntent)
-                    } catch (_: Throwable) {}
+                    // ۳. اطلاع‌رسانی به هسته سیستم‌سرور جهت همگام‌سازی کش و لغو اعلان در سطح سیستم (در صورت عدم ارسال از سیستم)
+                    if (!intent.getBooleanExtra("from_system", false)) {
+                        try {
+                            val syncIntent = Intent(Constants.ACTION_RESTORE_CLIPBOARD).apply {
+                                setPackage("android")
+                                putExtra(Constants.EXTRA_ORIGINAL_LINK, originalText)
+                                putExtra("from_app", true)
+                            }
+                            context.sendBroadcast(syncIntent)
+                        } catch (_: Throwable) {}
+                    }
 
                     // ۴. نمایش پیام کوتاه تایید بازیابی
                     try {
-                        Toast.makeText(context.applicationContext, "لینک اصلی بازگردانده شد", Toast.LENGTH_SHORT).show()
+                        val localizedCtx = LocaleHelper.wrapContext(context)
+                        Toast.makeText(context.applicationContext, localizedCtx.getString(R.string.msg_link_restored), Toast.LENGTH_SHORT).show()
                     } catch (_: Throwable) {}
                 }
             }

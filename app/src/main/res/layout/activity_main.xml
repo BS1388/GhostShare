@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="@color/m3_sys_color_background"
-    android:layoutDirection="rtl"
     android:fillViewport="true"
     android:scrollbars="none">
 
@@ -96,7 +95,7 @@
         </LinearLayout>
 
         <!-- ================================================================= -->
-        <!-- دسته‌بندی ۱: تنظیمات اصلی (Material 3 Switch Card)                 -->
+        <!-- دسته‌بندی ۱: تنظیمات اصلی (Material 3 Switch Card & Language)      -->
         <!-- ================================================================= -->
         <TextView
             android:layout_width="wrap_content"
@@ -108,6 +107,7 @@
             android:textSize="13sp"
             android:textStyle="bold" />
 
+        <!-- کارت ۱: سوئیچ اعلان بازگردانی -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -115,7 +115,7 @@
             android:orientation="horizontal"
             android:padding="16dp"
             android:gravity="center_vertical"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="12dp">
 
             <!-- آیکون اعلان در نشانگر مربعی گوشه‌گرد Material 3 -->
             <FrameLayout
@@ -164,6 +164,103 @@
                 android:layout_height="wrap_content"
                 android:track="@drawable/m3_switch_track"
                 android:thumb="@drawable/m3_switch_thumb" />
+        </LinearLayout>
+
+        <!-- کارت ۲: انتخابگر دوطرفه زبان (Material 3 Segmented Toggle Card) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_m3_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <!-- آیکون زبان در نشانگر مربعی گوشه‌گرد Material 3 -->
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:background="@drawable/bg_m3_icon_box_tertiary"
+                    android:layout_marginEnd="14dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_translate"
+                        android:contentDescription="@string/title_section_language" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_section_language"
+                        android:textColor="@color/m3_sys_color_on_surface"
+                        android:textSize="15.5sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="@string/desc_language_selection"
+                        android:textColor="@color/m3_sys_color_on_surface_variant"
+                        android:textSize="12.5sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- کنترل انتخابگر دوطرفه Material 3 Segmented Button Container -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_m3_segmented_container"
+                android:orientation="horizontal"
+                android:padding="3dp">
+
+                <!-- دکمه فارسی -->
+                <TextView
+                    android:id="@+id/btn_lang_fa"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_m3_segment_active"
+                    android:text="@string/lang_persian"
+                    android:textColor="@color/m3_sys_color_on_primary_container"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginEnd="2dp" />
+
+                <!-- دکمه انگلیسی -->
+                <TextView
+                    android:id="@+id/btn_lang_en"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_m3_segment_inactive"
+                    android:text="@string/lang_english"
+                    android:textColor="@color/m3_sys_color_on_surface_variant"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginStart="2dp" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- ================================================================= -->
@@ -304,7 +401,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/bg_m3_chip"
-                        android:text="🎬 یوتیوب و یوتیوب موزیک"
+                        android:text="@string/chip_youtube"
                         android:textColor="@color/m3_sys_color_on_surface"
                         android:textSize="11.5sp"
                         android:maxLines="1"
@@ -321,7 +418,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/bg_m3_chip"
-                        android:text="📸 اینستاگرام و تردز"
+                        android:text="@string/chip_instagram"
                         android:textColor="@color/m3_sys_color_on_surface"
                         android:textSize="11.5sp"
                         android:maxLines="1"
@@ -345,7 +442,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/bg_m3_chip"
-                        android:text="🎵 اسپوتیفای و ساندکلاد"
+                        android:text="@string/chip_spotify"
                         android:textColor="@color/m3_sys_color_on_surface"
                         android:textSize="11.5sp"
                         android:maxLines="1"
@@ -362,7 +459,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/bg_m3_chip"
-                        android:text="💬 ردیت و پینترست"
+                        android:text="@string/chip_reddit"
                         android:textColor="@color/m3_sys_color_on_surface"
                         android:textSize="11.5sp"
                         android:maxLines="1"
@@ -385,7 +482,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/bg_m3_chip"
-                        android:text="✖ ایکس (توییتر)"
+                        android:text="@string/chip_twitter"
                         android:textColor="@color/m3_sys_color_on_surface"
                         android:textSize="11.5sp"
                         android:maxLines="1"
@@ -402,7 +499,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/bg_m3_chip"
-                        android:text="📱 تیک‌تاک و گوگل"
+                        android:text="@string/chip_tiktok"
                         android:textColor="@color/m3_sys_color_on_surface"
                         android:textSize="11.5sp"
                         android:maxLines="1"
