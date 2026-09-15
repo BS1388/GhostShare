@@ -1,11 +1,11 @@
 # 👻 GhostShare
 
 <p align="center">
-  
-  <strong>System-level privacy shield that strips tracking parameters from copied links in real-time.</strong>
-</p>
 
 <img src="Logo/logo.png" width="128" alt="GhostShare Logo" />
+</p>
+  
+  <strong>System-level privacy shield that strips tracking parameters from copied links in real-time.</strong>
 </p>
 
 <p align="center">
