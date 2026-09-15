@@ -41,9 +41,11 @@
 3. Enable **GhostShare** in LSPosed Manager (Target: `System Framework` / `system_server`).
 5. Reboot your phone or soft-restart framework.
 
+---
 
-Copyright (C) 2026 BS1388
-Licensed under the GNU GPLv3
+## 📄 License
+Copyright (C) 2026 [BS1388](https://github.com/BS1388) Licensed under the GNU GPLv3
 
 ---
-Developed with ❤️ by [BS1388](https://github.com/BS1388)
+
+Developed with by [BS1388](https://github.com/BS1388)
