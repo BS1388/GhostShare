@@ -8,7 +8,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "ir.ghostshare"
+        applicationId = "io.github.bs1388.ghostshare"
         minSdk = 27
         targetSdk = 35
         versionCode = 1
