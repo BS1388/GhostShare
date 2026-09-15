@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="ir.ghostshare">
+
+    <!-- مجوز ارسال اعلان برای اندروید ۱۳ تا ۱۷+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@drawable/ic_launcher"
+        android:allowBackup="false"
+        android:theme="@style/Theme.GhostShare">
+
+        <!-- نشانه‌گذاری رسمی ماژول برای تمام نسخه‌های LSPosed / EdXposed / Xposed -->
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposedentry"
+            android:value="ir.ghostshare.HookEntry" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="@string/module_description" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="82" />
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope" />
+
+        <!-- صفحه اصلی تنظیمات، نمایش وضعیت و پیوند گیت‌هاب -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:configChanges="uiMode|screenSize|orientation"
+            android:theme="@style/Theme.GhostShare">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- اکتیویتی شفاف بازگردانی لینک اصلی (حفظ سازگاری قبلی) -->
+        <activity
+            android:name=".RestoreActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Invisible"
+            android:excludeFromRecents="true"
+            android:noHistory="true" />
+
+        <!-- گیرنده اعلان و بازیابی مستقیم در پس‌زمینه بدون باز شدن برنامه -->
+        <receiver
+            android:name=".NotificationReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="ir.ghostshare.ACTION_SHOW_NOTIFICATION" />
+                <action android:name="ir.ghostshare.ACTION_RESTORE_CLIPBOARD" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>

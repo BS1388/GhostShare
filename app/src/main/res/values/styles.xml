@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- تم اصلی ماژول GhostShare بر اساس Material 3 Design Kit (Light Theme) -->
+    <style name="Theme.GhostShare" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/m3_sys_color_background</item>
+        <item name="android:colorBackground">@color/m3_sys_color_background</item>
+        <item name="colorPrimary">@color/m3_sys_color_primary</item>
+        <item name="android:colorPrimary">@color/m3_sys_color_primary</item>
+        <item name="android:colorAccent">@color/m3_sys_color_primary</item>
+        <item name="android:statusBarColor">@color/m3_sys_color_background</item>
+        <item name="android:navigationBarColor">@color/m3_sys_color_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- تم مخصوص RestoreActivity: کاملاً شفاف و بدون انیمیشن یا پرش پنجره -->
+    <style name="Theme.Invisible" parent="android:Theme.Translucent.NoTitleBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

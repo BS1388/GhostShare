@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/m3_sys_color_ripple">
+    <!-- ماسک گوشه‌گرد ۲۴ دی‌پی همگام با انحنای کارت‌های Material 3 جهت حذف کامل افکت مستطیلی لمس -->
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+</ripple>

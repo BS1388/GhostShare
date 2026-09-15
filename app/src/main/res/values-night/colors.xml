@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- =================================================================== -->
+    <!-- Material 3 Design Kit Color System (Dark Theme)                      -->
+    <!-- Guidelines: https://m3.material.io / devrath/Material-3-Design-Kit  -->
+    <!-- =================================================================== -->
+
+    <!-- Primary Tokens -->
+    <color name="m3_sys_color_primary">#9BCAFF</color>
+    <color name="m3_sys_color_on_primary">#003257</color>
+    <color name="m3_sys_color_primary_container">#00497B</color>
+    <color name="m3_sys_color_on_primary_container">#D0E4FF</color>
+
+    <!-- Secondary Tokens -->
+    <color name="m3_sys_color_secondary">#B9C8DA</color>
+    <color name="m3_sys_color_on_secondary">#243240</color>
+    <color name="m3_sys_color_secondary_container">#3B4857</color>
+    <color name="m3_sys_color_on_secondary_container">#D5E4F7</color>
+
+    <!-- Tertiary Tokens -->
+    <color name="m3_sys_color_tertiary">#D5BEE5</color>
+    <color name="m3_sys_color_on_tertiary">#3A2A48</color>
+    <color name="m3_sys_color_tertiary_container">#514060</color>
+    <color name="m3_sys_color_on_tertiary_container">#F1DAFF</color>
+
+    <!-- Error Tokens -->
+    <color name="m3_sys_color_error">#FFB4AB</color>
+    <color name="m3_sys_color_on_error">#690005</color>
+    <color name="m3_sys_color_error_container">#4E1618</color>
+    <color name="m3_sys_color_on_error_container">#FFDAD6</color>
+
+    <!-- Success Tokens (Custom M3 Semantic) -->
+    <color name="m3_sys_color_success">#72DA8F</color>
+    <color name="m3_sys_color_on_success">#003919</color>
+    <color name="m3_sys_color_success_container">#133822</color>
+    <color name="m3_sys_color_on_success_container">#8DF6AB</color>
+
+    <!-- Warning Tokens (Custom M3 Semantic) -->
+    <color name="m3_sys_color_warning">#F5BE48</color>
+    <color name="m3_sys_color_on_warning">#402D00</color>
+    <color name="m3_sys_color_warning_container">#3F300C</color>
+    <color name="m3_sys_color_on_warning_container">#FFE086</color>
+
+    <!-- Neutral & Surface Tokens -->
+    <color name="m3_sys_color_background">#101418</color>
+    <color name="m3_sys_color_on_background">#E1E2E8</color>
+    <color name="m3_sys_color_surface">#101418</color>
+    <color name="m3_sys_color_on_surface">#E1E2E8</color>
+    <color name="m3_sys_color_surface_variant">#42474E</color>
+    <color name="m3_sys_color_on_surface_variant">#C2C7CF</color>
+
+    <!-- Tonal Surface Containers (M3 Elevation) -->
+    <color name="m3_sys_color_surface_container_lowest">#0B0E13</color>
+    <color name="m3_sys_color_surface_container_low">#181C20</color>
+    <color name="m3_sys_color_surface_container">#1D2024</color>
+    <color name="m3_sys_color_surface_container_high">#272A2F</color>
+    <color name="m3_sys_color_surface_container_highest">#32353A</color>
+
+    <!-- Outline Tokens -->
+    <color name="m3_sys_color_outline">#8C9199</color>
+    <color name="m3_sys_color_outline_variant">#32353A</color>
+
+    <!-- State Layer & Ripple Tokens (Material 3) -->
+    <color name="m3_sys_color_ripple">#26E1E2E8</color>
+
+    <!-- Legacy / App References mapped to M3 Tokens -->
+    <color name="primary">@color/m3_sys_color_primary</color>
+    <color name="primary_dark">#00497B</color>
+    <color name="accent">@color/m3_sys_color_success</color>
+    <color name="window_background">@color/m3_sys_color_background</color>
+    <color name="card_background">@color/m3_sys_color_surface_container</color>
+    <color name="card_stroke">@color/m3_sys_color_outline_variant</color>
+    <color name="text_primary">@color/m3_sys_color_on_surface</color>
+    <color name="text_secondary">@color/m3_sys_color_on_surface_variant</color>
+
+    <color name="badge_active_bg">@color/m3_sys_color_success_container</color>
+    <color name="badge_active_text">@color/m3_sys_color_on_success_container</color>
+    <color name="badge_warning_bg">@color/m3_sys_color_warning_container</color>
+    <color name="badge_warning_text">@color/m3_sys_color_on_warning_container</color>
+    <color name="badge_inactive_bg">@color/m3_sys_color_error_container</color>
+    <color name="badge_inactive_text">@color/m3_sys_color_on_error_container</color>
+
+    <color name="badge_background">@color/m3_sys_color_error_container</color>
+    <color name="badge_text">@color/m3_sys_color_on_error_container</color>
+</resources>

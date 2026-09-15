@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <layer-list>
+            <item android:top="4dp" android:bottom="4dp" android:start="4dp" android:end="4dp">
+                <shape android:shape="oval">
+                    <solid android:color="@color/m3_sys_color_on_primary" />
+                    <size android:width="24dp" android:height="24dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item android:top="8dp" android:bottom="8dp" android:start="8dp" android:end="8dp">
+                <shape android:shape="oval">
+                    <solid android:color="@color/m3_sys_color_outline" />
+                    <size android:width="16dp" android:height="16dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

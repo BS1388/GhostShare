@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@color/m3_sys_color_background"
+    android:layoutDirection="rtl"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="24dp">
+
+        <!-- ================================================================= -->
+        <!-- بخش هدر بر اساس Material 3 Top App Bar & Hero                     -->
+        <!-- ================================================================= -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginBottom="28dp">
+
+            <!-- آیکون برنامه در کانتینر ترنزیشنال Material 3 -->
+            <FrameLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/bg_m3_icon_box_primary">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_launcher"
+                    android:contentDescription="@string/app_name" />
+            </FrameLayout>
+
+            <!-- عنوان بزرگ Material 3 Headline Medium -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/app_name"
+                android:textColor="@color/m3_sys_color_on_surface"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.01" />
+
+            <!-- زیرعنوان Material 3 Body Medium -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/app_subtitle"
+                android:textColor="@color/m3_sys_color_on_surface_variant"
+                android:textSize="13.5sp" />
+
+            <!-- نشانگر وضعیت اتصال ماژول (Material 3 Tonal Status Badge) -->
+            <LinearLayout
+                android:id="@+id/layout_status_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_m3_badge_inactive"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingTop="7dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="7dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/iv_status_dot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_dot"
+                    android:contentDescription="Status" />
+
+                <TextView
+                    android:id="@+id/tv_status_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/status_inactive"
+                    android:textColor="@color/m3_sys_color_on_error_container"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ================================================================= -->
+        <!-- دسته‌بندی ۱: تنظیمات اصلی (Material 3 Switch Card)                 -->
+        <!-- ================================================================= -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/title_section_settings"
+            android:textColor="@color/m3_sys_color_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_m3_card"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
+
+            <!-- آیکون اعلان در نشانگر مربعی گوشه‌گرد Material 3 -->
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_m3_icon_box_secondary"
+                android:layout_marginEnd="14dp">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_notifications"
+                    android:contentDescription="@string/title_show_notification" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_show_notification"
+                    android:textColor="@color/m3_sys_color_on_surface"
+                    android:textSize="15.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="@string/desc_show_notification"
+                    android:textColor="@color/m3_sys_color_on_surface_variant"
+                    android:textSize="12.5sp"
+                    android:lineSpacingExtra="2dp" />
+            </LinearLayout>
+
+            <!-- سوئیچ اختصاصی سازگار با طراحی Material 3 -->
+            <Switch
+                android:id="@+id/switch_restore_notification"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:track="@drawable/m3_switch_track"
+                android:thumb="@drawable/m3_switch_thumb" />
+        </LinearLayout>
+
+        <!-- ================================================================= -->
+        <!-- دسته‌بندی ۲: نحوه کارکرد ماژول (Material 3 Info Card)               -->
+        <!-- ================================================================= -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/title_section_how_it_works"
+            android:textColor="@color/m3_sys_color_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_m3_card"
+            android:orientation="vertical"
+            android:padding="18dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+
+                <FrameLayout
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_m3_icon_box_tertiary"
+                    android:layout_marginEnd="12dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_info"
+                        android:contentDescription="Info" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_how_it_works"
+                    android:textColor="@color/m3_sys_color_on_surface"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/desc_how_it_works"
+                android:textColor="@color/m3_sys_color_on_surface_variant"
+                android:textSize="13sp"
+                android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+
+        <!-- ================================================================= -->
+        <!-- دسته‌بندی ۳: پلتفرم‌های تحت پوشش (Material 3 Chips Flow)           -->
+        <!-- ================================================================= -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/title_section_platforms"
+            android:textColor="@color/m3_sys_color_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_m3_card"
+            android:orientation="vertical"
+            android:padding="18dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <FrameLayout
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_m3_icon_box_primary"
+                    android:layout_marginEnd="12dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_shield_check"
+                        android:contentDescription="Shield" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_section_platforms"
+                    android:textColor="@color/m3_sys_color_on_surface"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/desc_platforms_overview"
+                android:textColor="@color/m3_sys_color_on_surface_variant"
+                android:textSize="12.5sp"
+                android:lineSpacingExtra="2dp"
+                android:layout_marginBottom="12dp" />
+
+            <!-- چیپ‌های Material 3 برای پلتفرم‌ها -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- سطر ۱ -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_m3_chip"
+                        android:text="🎬 یوتیوب و یوتیوب موزیک"
+                        android:textColor="@color/m3_sys_color_on_surface"
+                        android:textSize="11.5sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:paddingStart="4dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:layout_marginEnd="6dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_m3_chip"
+                        android:text="📸 اینستاگرام و تردز"
+                        android:textColor="@color/m3_sys_color_on_surface"
+                        android:textSize="11.5sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:paddingStart="4dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <!-- سطر ۲ -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_m3_chip"
+                        android:text="🎵 اسپوتیفای و ساندکلاد"
+                        android:textColor="@color/m3_sys_color_on_surface"
+                        android:textSize="11.5sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:paddingStart="4dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:layout_marginEnd="6dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_m3_chip"
+                        android:text="💬 ردیت و پینترست"
+                        android:textColor="@color/m3_sys_color_on_surface"
+                        android:textSize="11.5sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:paddingStart="4dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <!-- سطر ۳ -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_m3_chip"
+                        android:text="✖ ایکس (توییتر)"
+                        android:textColor="@color/m3_sys_color_on_surface"
+                        android:textSize="11.5sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:paddingStart="4dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:layout_marginEnd="6dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_m3_chip"
+                        android:text="📱 تیک‌تاک و گوگل"
+                        android:textColor="@color/m3_sys_color_on_surface"
+                        android:textSize="11.5sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:paddingStart="4dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ================================================================= -->
+        <!-- دسته‌بندی ۴: مخزن رسمی گیت‌هاب (Material 3 Interactive Card)      -->
+        <!-- ================================================================= -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/title_section_community"
+            android:textColor="@color/m3_sys_color_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/card_github"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_m3_card"
+            android:foreground="@drawable/bg_m3_ripple_card"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <!-- نشان Material 3 برای گیت‌هاب -->
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_m3_icon_box_primary"
+                android:layout_marginEnd="14dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_github"
+                    android:contentDescription="GitHub" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_github"
+                    android:textColor="@color/m3_sys_color_on_surface"
+                    android:textSize="15.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/desc_github"
+                    android:textColor="@color/m3_sys_color_on_surface_variant"
+                    android:textSize="12sp" />
+
+                <!-- تگ کوچک مخزن گیت‌هاب -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_m3_chip"
+                    android:text="@string/github_repo_tag"
+                    android:textColor="@color/m3_sys_color_primary"
+                    android:textSize="10.5sp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="3dp" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_open_in_new"
+                android:contentDescription="Open in Browser" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

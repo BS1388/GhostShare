@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GhostShare</string>
+    <string name="app_subtitle">پاک‌سازی هوشمند پارامترهای رهگیری از کلیپ‌بورد</string>
+    <string name="module_description">Automatically strips tracking parameters (utm_*, igsh, si, fbclid, gclid, etc.) from copied links across the entire OS.</string>
+
+    <!-- عناوین دسته‌بندی‌های Material 3 -->
+    <string name="title_section_status">وضعیت اتصال</string>
+    <string name="title_section_settings">تنظیمات اصلی</string>
+    <string name="title_section_how_it_works">نحوه کارکرد ماژول</string>
+    <string name="title_section_platforms">پلتفرم‌های تحت پوشش</string>
+    <string name="title_section_community">سورس‌کد و مشارکت</string>
+
+    <!-- وضعیت ماژول در چارچوب سیستم -->
+    <string name="status_active">چارچوب سیستم (LSPosed) : فعال</string>
+    <string name="status_inactive">چارچوب سیستم (LSPosed) : غیرفعال</string>
+    <string name="status_needs_reboot">ماژول فعال است (جهت تزریق سراسری ری‌استارت کنید)</string>
+    <string name="status_checking">در حال بررسی وضعیت...</string>
+
+    <!-- بخش اعلان -->
+    <string name="title_show_notification">اعلان بازگردانی سریع</string>
+    <string name="desc_show_notification">نمایش اعلان ۵ ثانیه‌ای دارای دکمه «بازگرداندن» مستقیم بدون باز شدن هیچ برنامه‌ای</string>
+    <string name="action_restore">بازگرداندن</string>
+    <string name="msg_link_restored">لینک اصلی بازگردانده شد</string>
+    <string name="dialog_notif_permission_title">دسترسی به اعلان‌ها</string>
+    <string name="dialog_notif_permission_message">برای نمایش اعلان ۵ ثانیه‌ای و دکمه بازگردانی سریع لینک پاک‌سازی شده، ماژول GhostShare نیاز به مجوز اعلان دارد.\n\nبدون این مجوز، لینک‌ها کماکان در پس‌زمینه پاک‌سازی می‌شوند اما امکان بازگردانی سریع فراهم نخواهد بود.</string>
+    <string name="dialog_notif_permission_positive">اعطای مجوز</string>
+    <string name="dialog_notif_permission_negative">انصراف</string>
+    <string name="msg_notif_permission_denied">مجوز اعلان داده نشد</string>
+    <string name="msg_notif_permission_settings_guide">لطفاً دسترسی اعلان را از بخش تنظیمات فعال کنید</string>
+    <string name="msg_notif_enabled">اعلان بازگردانی فعال شد</string>
+    <string name="msg_notif_disabled">اعلان بازگردانی غیرفعال شد (پاک‌سازی بدون اعلان)</string>
+
+    <!-- کارت نحوه کارکرد -->
+    <string name="title_how_it_works">عملکرد سراسری در پس‌زمینه</string>
+    <string name="desc_how_it_works">ماژول GhostShare با تزریق به هسته سیستم‌عامل (system_server) و کلیپ‌بورد، کلیه لینک‌های کپی شده را به صورت آنی پایش کرده و پارامترهای رهگیری تبلیغاتی و تحلیلی را بدون تغییر در محتوای اصلی حذف می‌نماید.</string>
+
+    <!-- کارت پلتفرم‌ها -->
+    <string name="desc_platforms_overview">تمامی پارامترهای رهگیری در پلتفرم‌های پرکاربرد زیر به صورت هوشمند و بدون شکستن لینک پاک‌سازی می‌شوند:</string>
+    <string name="tracker_youtube">یوتیوب و یوتیوب موزیک</string>
+    <string name="tracker_spotify">اسپوتیفای</string>
+    <string name="tracker_soundcloud">ساندکلاد</string>
+    <string name="tracker_reddit">ردیت</string>
+    <string name="tracker_pinterest">پینترست</string>
+    <string name="tracker_instagram">اینستاگرام و تردز</string>
+    <string name="tracker_twitter">ایکس (توییتر)</string>
+    <string name="tracker_tiktok">تیک‌تاک</string>
+    <string name="tracker_google">گوگل، فیسبوک و تبلیغات</string>
+
+    <!-- کارت گیت‌هاب بر اساس Material 3 Design Kit -->
+    <string name="title_github">سورس‌کد در گیت‌هاب</string>
+    <string name="desc_github">مشاهده مخزن، ستاره دادن و مشارکت در توسعه GhostShare</string>
+    <string name="github_repo_tag">BS1388 / GhostShare</string>
+
+    <!-- پاورقی -->
+    <string name="version_info">GhostShare v1.0 • مبتنی بر Material 3 Design Kit</string>
+
+    <!-- اسکوپ ماژول در LSPosed -->
+    <string-array name="xposed_scope">
+        <item>android</item>
+        <item>ir.ghostshare</item>
+    </string-array>
+</resources>

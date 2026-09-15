@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- =================================================================== -->
+    <!-- Material 3 Dynamic Colors (Monet) - Dark Theme (Android 12+ / v31)  -->
+    <!-- استخراج خودکار پالت رنگی از والپیپر و تم گوشی کاربر                  -->
+    <!-- =================================================================== -->
+
+    <!-- Primary Tokens -->
+    <color name="m3_sys_color_primary">@android:color/system_accent1_200</color>
+    <color name="m3_sys_color_on_primary">@android:color/system_accent1_800</color>
+    <color name="m3_sys_color_primary_container">@android:color/system_accent1_700</color>
+    <color name="m3_sys_color_on_primary_container">@android:color/system_accent1_100</color>
+
+    <!-- Secondary Tokens -->
+    <color name="m3_sys_color_secondary">@android:color/system_accent2_200</color>
+    <color name="m3_sys_color_on_secondary">@android:color/system_accent2_800</color>
+    <color name="m3_sys_color_secondary_container">@android:color/system_accent2_700</color>
+    <color name="m3_sys_color_on_secondary_container">@android:color/system_accent2_100</color>
+
+    <!-- Tertiary Tokens -->
+    <color name="m3_sys_color_tertiary">@android:color/system_accent3_200</color>
+    <color name="m3_sys_color_on_tertiary">@android:color/system_accent3_800</color>
+    <color name="m3_sys_color_tertiary_container">@android:color/system_accent3_700</color>
+    <color name="m3_sys_color_on_tertiary_container">@android:color/system_accent3_100</color>
+
+    <!-- Neutral & Surface Containers (Tonal Surfaces) -->
+    <color name="m3_sys_color_background">@android:color/system_neutral1_900</color>
+    <color name="m3_sys_color_on_background">@android:color/system_neutral1_100</color>
+    <color name="m3_sys_color_surface">@android:color/system_neutral1_900</color>
+    <color name="m3_sys_color_on_surface">@android:color/system_neutral1_100</color>
+    <color name="m3_sys_color_surface_variant">@android:color/system_neutral2_700</color>
+    <color name="m3_sys_color_on_surface_variant">@android:color/system_neutral2_200</color>
+
+    <color name="m3_sys_color_surface_container_lowest">@android:color/system_neutral1_1000</color>
+    <color name="m3_sys_color_surface_container_low">@android:color/system_neutral1_900</color>
+    <color name="m3_sys_color_surface_container">@android:color/system_neutral1_800</color>
+    <color name="m3_sys_color_surface_container_high">@android:color/system_neutral1_700</color>
+    <color name="m3_sys_color_surface_container_highest">@android:color/system_neutral1_600</color>
+
+    <!-- Outline Tokens -->
+    <color name="m3_sys_color_outline">@android:color/system_neutral2_400</color>
+    <color name="m3_sys_color_outline_variant">@android:color/system_neutral2_700</color>
+
+    <!-- State Layer & Ripple Tokens (Material 3 Dynamic Colors) -->
+    <color name="m3_sys_color_ripple">#26E1E2E8</color>
+
+    <!-- Semantic Status Colors -->
+    <color name="m3_sys_color_success">#72DA8F</color>
+    <color name="m3_sys_color_on_success">#003919</color>
+    <color name="m3_sys_color_success_container">#133822</color>
+    <color name="m3_sys_color_on_success_container">#8DF6AB</color>
+
+    <color name="m3_sys_color_warning">#F5BE48</color>
+    <color name="m3_sys_color_on_warning">#402D00</color>
+    <color name="m3_sys_color_warning_container">#3F300C</color>
+    <color name="m3_sys_color_on_warning_container">#FFE086</color>
+
+    <color name="m3_sys_color_error">#FFB4AB</color>
+    <color name="m3_sys_color_on_error">#690005</color>
+    <color name="m3_sys_color_error_container">#4E1618</color>
+    <color name="m3_sys_color_on_error_container">#FFDAD6</color>
+
+    <!-- Legacy / App References -->
+    <color name="primary">@color/m3_sys_color_primary</color>
+    <color name="primary_dark">@android:color/system_accent1_900</color>
+    <color name="accent">@color/m3_sys_color_success</color>
+    <color name="window_background">@color/m3_sys_color_background</color>
+    <color name="card_background">@color/m3_sys_color_surface_container</color>
+    <color name="card_stroke">@color/m3_sys_color_outline_variant</color>
+    <color name="text_primary">@color/m3_sys_color_on_surface</color>
+    <color name="text_secondary">@color/m3_sys_color_on_surface_variant</color>
+
+    <color name="badge_active_bg">@color/m3_sys_color_success_container</color>
+    <color name="badge_active_text">@color/m3_sys_color_on_success_container</color>
+    <color name="badge_warning_bg">@color/m3_sys_color_warning_container</color>
+    <color name="badge_warning_text">@color/m3_sys_color_on_warning_container</color>
+    <color name="badge_inactive_bg">@color/m3_sys_color_error_container</color>
+    <color name="badge_inactive_text">@color/m3_sys_color_on_error_container</color>
+    <color name="badge_background">@color/m3_sys_color_error_container</color>
+    <color name="badge_text">@color/m3_sys_color_on_error_container</color>
+</resources>
