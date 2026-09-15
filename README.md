@@ -39,7 +39,11 @@
 1. Install [LSPosed Framework](https://github.com/LSPosed/LSPosed).
 2. Download and install the latest `GhostShare.apk` from [Releases](https://github.com/BS1388/GhostShare/releases).
 3. Enable **GhostShare** in LSPosed Manager (Target: `System Framework` / `system_server`).
-4. Reboot your phone or soft-restart framework.
+5. Reboot your phone or soft-restart framework.
+
+
+Copyright (C) 2026 BS1388
+Licensed under the GNU GPLv3
 
 ---
 Developed with ❤️ by [BS1388](https://github.com/BS1388)
