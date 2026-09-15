@@ -20,7 +20,7 @@
             android:value="ir.ghostshare.HookEntry" />
         <meta-data
             android:name="xposeddescription"
-            android:value="@string/module_description" />
+            android:value="Automatically strips tracking parameters (utm_*, igsh, si, fbclid, gclid, etc.) from copied links across the entire OS." />
         <meta-data
             android:name="xposedminversion"
             android:value="82" />
