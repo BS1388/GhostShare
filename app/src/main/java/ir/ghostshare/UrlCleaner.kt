@@ -59,7 +59,7 @@ object UrlCleaner {
     private val YOUTUBE_ONLY_KEYS = setOf("si", "feature", "pp", "ab_channel", "cbrd", "themerefresh")
     private val SPOTIFY_ONLY_KEYS = setOf("si", "nd", "pi", "pt")
     private val SOUNDCLOUD_ONLY_KEYS = setOf("si", "p", "c", "ref")
-    private val REDDIT_ONLY_KEYS = setOf("rdt_cid", "share_id", "ref", "ref_source")
+    private val REDDIT_ONLY_KEYS = setOf("rdt_cid", "share_id", "ref")
     private val PINTEREST_ONLY_KEYS = setOf("epik", "invite_code", "sender", "sfo", "nic")
     private val TIKTOK_ONLY_KEYS = setOf(
         "_r", "_t", "_d", "web_id", "is_from_webapp", "is_fromwebapp", "sender_device",
@@ -67,7 +67,7 @@ object UrlCleaner {
     )
     private val META_KEEP_KEYS = setOf("img_index", "story_media_id", "next", "q")
     private val META_REDIRECTOR_KEYS = setOf(
-        "igsh", "igsi", "igshid", "stkn", "sktn", "xmt", "slof", "shid", "obrf", "source", "src"
+        "igsh", "igsi", "igshid", "stkn", "sktn", "xmt", "slof", "shid", "obrf", "src"
     )
 
     fun clean(text: String): String? = cleanWithReport(text)?.cleanedText
