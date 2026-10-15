@@ -1,10 +1,9 @@
-# 👻 GhostShare
+<p align="center">
+  <img src="Logo/logo.png" width="128" alt="GhostShare Logo" />
+</p>
 
 <p align="center">
-
-<img src="Logo/logo.png" width="128" alt="GhostShare Logo" />
-</p>
-  
+  <b>👻 GhostShare</b><br />
   <strong>System-level privacy shield that strips tracking parameters from copied links in real-time.</strong>
 </p>
 
@@ -17,35 +16,40 @@
 
 ---
 
-## ✨ Overview
+**✨ Overview**
+
 **GhostShare** is an ultra-lightweight, battery-friendly LSPosed module hooked directly into `system_server`. It automatically monitors clipboard operations and cleans telemetry, affiliate, and analytical tracking tags from URLs without breaking essential parameters or requiring root background services.
 
-## 🚀 Key Features
+**🚀 Key Features**
+
 * **Zero Overhead ($O(N)$ fast-path):** Bypasses non-URL clips instantly; zero battery drain and immune to ReDoS.
 * **Deep System Hook:** Runs securely inside `system_server` with zero memory leaks (`ThreadLocal` sanitation).
 * **Silent & Non-intrusive:** 5-second silent notification with an instant **Undo** button.
 * **Preserves Media States:** Retains crucial parameters like YouTube timestamps (`t=`, `start=`) and playlist indexes.
 * **Material You (Dynamic Colors):** Follows system palette, dark/light themes, and edge-to-edge aesthetics.
 
-## 🌐 Supported Platforms
-* **Instagram & Threads** (`igsh`, `utm_*`)
-* **YouTube & YouTube Music** (`si`, `feature`, timestamp preserved)
-* **X (Twitter)** (`s`, `t`, `ref_src`)
-* **TikTok & Google Analytics** (`_r`, `_t`, `gclid`, `fbclid`)
+**🌐 Supported Platforms**
+
+* **Instagram & Threads:** every query parameter and the URL fragment are removed, except the functional ones (`img_index`, `story_media_id`, `next`, `q`)
+* **YouTube & YouTube Music:** `si`, `feature`, timestamp preserved
+* **X (Twitter):** `s`, `t`, `ref_src`
+* **TikTok & Google Analytics:** `_r`, `_t`, `gclid`, `fbclid`
 * **Reddit & Pinterest**
 * **Spotify & SoundCloud**
 
-## 📥 Installation
+**📥 Installation**
+
 1. Install [LSPosed Framework](https://github.com/LSPosed/LSPosed).
 2. Download and install the latest `GhostShare.apk` from [Releases](https://github.com/BS1388/GhostShare/releases).
 3. Enable **GhostShare** in LSPosed Manager (Target: `System Framework` / `system_server`).
-5. Reboot your phone or soft-restart framework.
+4. Reboot your phone or soft-restart the framework.
 
 ---
 
-## 📄 License
-Copyright (C) 2026 [BS1388](https://github.com/BS1388) Licensed under the GNU GPLv3
+**📄 License**
+
+Copyright (C) 2026 [BS1388](https://github.com/BS1388). Licensed under the GNU GPLv3.
 
 ---
 
-Developed with by [BS1388](https://github.com/BS1388)
+Developed by [BS1388](https://github.com/BS1388)
