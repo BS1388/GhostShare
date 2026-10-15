@@ -27,7 +27,7 @@ object UrlCleaner {
     )
     private val GOOGLE_KEYS = setOf(
         "gclid", "gclsrc", "dclid", "gbraid", "wbraid",
-        "gad_source", "srsltid", "_ga", "_gl"
+        "gad_source", "srsltid", "_ga", "_gl", "gtm_debug", "usqp"
     )
     private val YOUTUBE_KEYS = setOf("si", "feature", "pp")
     private val TWITTER_KEYS = setOf("twclid", "ref_src", "ref_url")
@@ -39,17 +39,38 @@ object UrlCleaner {
     private val REDDIT_KEYS = setOf("rdt_cid", "share_id")
     private val PINTEREST_KEYS = setOf("epik", "invite_code")
     private val AFFILIATE_KEYS = setOf(
-        "spm", "scm", "aff_fcid", "aff_fsk", "aff_platform", "aff_trace_key"
+        "spm", "scm", "aff_fcid", "aff_fsk", "aff_platform", "aff_trace_key",
+        "irclickid", "cjevent", "cjdata", "tduid", "shareasale", "gci"
     )
     private val MARKETING_KEYS = setOf(
         "mc_cid", "mc_eid", "mkt_tok", "_hsenc", "_hsmi",
         "vero_id", "vero_conv", "yclid", "_openstat", "wickedid"
     )
+    private val ADS_KEYS = setOf(
+        "sccid", "qclid", "tblci", "dicbo", "ymclid", "ysclid", "awclid", "ad_id",
+        "oicd", "vmcid", "afid", "guce_referrer", "guce_referrer_sig", "auctid",
+        "unicorn_click_id", "_z1_agid", "_z1_caid", "_z1_msid", "_z1_pub"
+    )
+    private val EMAIL_KEYS = setOf(
+        "__hsfp", "__hssc", "__hstc", "hsctatracking", "_kx", "_ke", "_bhlid", "bbeml",
+        "ml_subscriber", "ml_subscriber_hash", "ck_subscriber_id", "ct_params",
+        "bsft_clkid", "bsft_uid", "omnisendcontactid", "sc_customer", "sc_eh", "sc_uid",
+        "ss_email_id", "__s", "vgo_ee", "et_rid", "at_recipient_id", "at_recipient_list",
+        "h_sid", "h_slt"
+    )
+    private val ANALYTICS_KEYS = setOf(
+        "adobe_mc_ref", "adobe_mc_sdid", "ef_id", "s_cid", "s_kwcid",
+        "_branch_match_id", "_branch_referrer", "mtm_cid", "pk_cid", "wt.mc_id",
+        "oft_c", "oft_campaign", "oft_ck", "oft_d", "oft_id", "oft_ids", "oft_k",
+        "oft_lk", "oft_sk", "oly_anon_id", "oly_enc_id", "otc", "icid", "rb_clickid",
+        "subafid", "cn_reloaded", "ao_noptimize"
+    )
 
     private val GLOBAL_TRACKING_KEYS: Set<String> =
         META_KEYS + GOOGLE_KEYS + YOUTUBE_KEYS + TWITTER_KEYS + TIKTOK_KEYS +
             SPOTIFY_KEYS + MICROSOFT_KEYS + YAHOO_KEYS + LINKEDIN_KEYS +
-            REDDIT_KEYS + PINTEREST_KEYS + AFFILIATE_KEYS + MARKETING_KEYS
+            REDDIT_KEYS + PINTEREST_KEYS + AFFILIATE_KEYS + MARKETING_KEYS +
+            ADS_KEYS + EMAIL_KEYS + ANALYTICS_KEYS
 
     private val GLOBAL_TRACKING_PREFIXES = arrayOf(
         "utm_", "fb_", "hsa_", "action_object_", "action_type_", "action_ref_"
