@@ -65,31 +65,113 @@ object UrlCleaner {
         "oft_lk", "oft_sk", "oly_anon_id", "oly_enc_id", "otc", "icid", "rb_clickid",
         "subafid", "cn_reloaded", "ao_noptimize"
     )
+    private val GENERIC_KEYS = setOf("cid", "clickid", "eid", "campaign")
+    private val MYTRACKER_KEYS = setOf(
+        "mt_click_id", "mt_network", "mt_campaign", "mt_adset", "mt_creative", "mt_medium",
+        "mt_sub1", "mt_sub2", "mt_sub3", "mt_sub4", "mt_sub5", "mt_link_id"
+    )
+    private val ADJUST_KEYS = setOf(
+        "adj_label", "adj_campaign", "adj_creative", "gps_adid", "adjust_creative",
+        "adjust_tracker_limit", "adjust_tracker", "adjust_adgroup", "adjust_campaign",
+        "adjust_referrer"
+    )
+    private val APPSFLYER_KEYS = setOf(
+        "af_xp", "af_ad", "af_adset", "af_click_lookback", "af_force_deeplink",
+        "is_retargeting"
+    )
+    private val AT_INTERNET_KEYS = setOf(
+        "at_campaign", "at_campaign_type", "at_creation", "at_emailtype", "at_link",
+        "at_link_id", "at_link_origin", "at_link_type", "at_medium", "at_ptr_name",
+        "at_send_date"
+    )
+    private val CAMPAIGN_KEYS = setOf(
+        "tw_medium", "tw_profile_id", "tw_source", "_sgm_campaign", "_sgm_term",
+        "_sgm_pinned", "ebisother1", "ebisother2", "ebisother3", "ebisother4", "ebisother5",
+        "vsm_type", "vsm_cid", "vsm_pid", "sms_click", "sms_source", "sms_uph", "cm_me",
+        "cm_cr", "ir_campaignid", "ir_adid", "ir_partnerid", "pk_vid", "_sgm_source",
+        "_sgm_action", "int_content", "int_term", "int_source", "int_medium",
+        "int_campaign", "itm_source", "itm_medium", "itm_campaign", "itm_content",
+        "itm_term", "dpg_source", "dpg_campaign", "dpg_medium", "dpg_content", "bsft_eid",
+        "bsft_mid", "bsft_aaid", "bsft_ek", "pk_campaign", "pk_medium", "pk_source",
+        "ebisadid"
+    )
+    private val MORE_TRACKING_KEYS = setOf(
+        "pjclid", "x-clickref", "x-source", "x-a-medium", "ranmid", "raneaid", "ransiteid",
+        "eml-name", "eml-mediaplan", "eml-publisher", "eurl", "link_source", "taid",
+        "tgclid", "analytics_context", "analytics_trace_id", "bance_xuid", "winflncrtag",
+        "ftag", "janet", "vs_campaign_id", "adsterra_clid", "adsterra_placement_id",
+        "loclid", "ldtag_cl", "lt_r", "srclt", "_ly_c", "_ly_r", "yj_r", "line_uid",
+        "adc_publisher", "adc_token", "uzcid", "beyond_uzcvid", "beyond_uzmcvid",
+        "bemobdata", "_bdadid", "recommended_by", "recommended_code",
+        "personaclick_search_query", "personaclick_input_query", "ems_dl", "emcs_t",
+        "cstrackid", "btag", "jmtyclid", "tcsack", "_ope", "spot_im_redirect_source",
+        "iclid", "user_email_address", "sscid", "rtkcid", "__io_lv", "_io_session_id",
+        "asgtbndr", "ymid", "mindbox-click-id", "famad_xuid", "cx_click", "cx_recsorder",
+        "cx_recswidget", "mindbox-message-key", "awc", "clckid", "ym_tracking_id",
+        "aiad_clid", "maf", "_clde", "_cldee", "oprtrack", "xtor", "gad_campaignid",
+        "admitad_uid", "external_click_id", "irgwc", "fbadid", "nb_placement",
+        "nb_expid_meta", "adfrom", "nx_source", "_zucks_suid", "guccounter", "vc_lpp",
+        "gs_l", "hmb_campaign", "hmb_medium", "hmb_source", "os_ehash",
+        "__twitter_impression", "wt_zmc", "wtrid", "echobox", "tracking_source", "ceneo_spo"
+    )
 
     private val GLOBAL_TRACKING_KEYS: Set<String> =
         META_KEYS + GOOGLE_KEYS + YOUTUBE_KEYS + TWITTER_KEYS + TIKTOK_KEYS +
             SPOTIFY_KEYS + MICROSOFT_KEYS + YAHOO_KEYS + LINKEDIN_KEYS +
             REDDIT_KEYS + PINTEREST_KEYS + AFFILIATE_KEYS + MARKETING_KEYS +
-            ADS_KEYS + EMAIL_KEYS + ANALYTICS_KEYS
+            ADS_KEYS + EMAIL_KEYS + ANALYTICS_KEYS + GENERIC_KEYS +
+            MYTRACKER_KEYS + ADJUST_KEYS + APPSFLYER_KEYS + AT_INTERNET_KEYS + CAMPAIGN_KEYS + MORE_TRACKING_KEYS
 
     private val GLOBAL_TRACKING_PREFIXES = arrayOf(
-        "utm_", "fb_", "hsa_", "action_object_", "action_type_", "action_ref_"
+        "utm_", "fb_", "hsa_", "action_object_", "action_type_", "action_ref_",
+        "mtm_", "ga_", "otm_", "vn_", "at_custom", "cm_mmc"
     )
 
     private val YOUTUBE_PROTECTED_KEYS = setOf("v", "t", "start", "list", "index")
-    private val YOUTUBE_ONLY_KEYS = setOf("si", "feature", "pp", "ab_channel", "cbrd", "themerefresh")
+    private val YOUTUBE_ONLY_KEYS = setOf("si", "feature", "pp", "kw", "ab_channel", "cbrd", "themerefresh")
     private val SPOTIFY_ONLY_KEYS = setOf("si", "nd", "pi", "pt")
     private val SOUNDCLOUD_ONLY_KEYS = setOf("si", "p", "c", "ref")
-    private val REDDIT_ONLY_KEYS = setOf("rdt_cid", "share_id", "ref")
+    private val REDDIT_ONLY_KEYS = setOf(
+        "rdt_cid", "share_id", "ref", "ref_source", "ref_campaign", "correlation_id", "rdt",
+        "\$deep_link", "\$3p", "\$original_url"
+    )
     private val PINTEREST_ONLY_KEYS = setOf("epik", "invite_code", "sender", "sfo", "nic")
     private val TIKTOK_ONLY_KEYS = setOf(
         "_r", "_t", "_d", "web_id", "is_from_webapp", "is_fromwebapp", "sender_device",
-        "share_app_id", "share_item_id", "share_link_id", "tt_from", "checksum"
+        "share_app_id", "share_item_id", "share_link_id", "tt_from", "checksum",
+        "u_code", "preview_pb", "share_app_name", "share_iid", "user_id", "source"
     )
     private val META_KEEP_KEYS = setOf("img_index", "story_media_id", "next", "q")
     private val META_REDIRECTOR_KEYS = setOf(
-        "igsh", "igsi", "igshid", "stkn", "sktn", "xmt", "slof", "shid", "obrf", "src"
+        "igsh", "igsi", "igshid", "stkn", "sktn", "xmt", "slof", "shid", "obrf", "source", "src"
     )
+    private val TWITTER_ONLY_KEYS = setOf("s", "t", "src", "cn")
+    private val FACEBOOK_ONLY_KEYS = setOf(
+        "__tn__", "comment_tracking", "dti", "ls_ref", "tracking", "rdc", "rdr", "_rdr",
+        "eav", "paipv", "wtsid", "idorvanity", "referral_code", "referral_story_type"
+    )
+    private val LINKEDIN_ONLY_KEYS = setOf("refid", "trk", "lipi", "lici")
+    private val SNAPCHAT_ONLY_KEYS = setOf("sc_referrer", "sc_ua")
+    private val EBAY_ONLY_KEYS = setOf("_trkparms", "_trksid", "_from", "hash", "mkevt", "mkcid")
+    private val NETFLIX_ONLY_KEYS = setOf("trackid", "tctx")
+    private val BING_ONLY_KEYS = setOf("sk", "sp", "sc", "qs", "qp")
+    private val ETSY_ONLY_KEYS = setOf("click_key", "click_sum", "organic_search_click")
+    private val AIRBNB_ONLY_KEYS = setOf("federated_search_id", "search_type", "source_impression_id")
+    private val AMAZON_ONLY_KEYS = setOf(
+        "ref_", "tag", "qid", "sr", "srs", "sprefix", "crid", "linkcode", "creativeasin",
+        "ascsubtag", "aaxitk", "rnid", "dchild", "camp", "creative", "content-id", "dib",
+        "dib_tag", "social_share", "starsleft", "skiptwisterog", "th", "refrid", "colid",
+        "coliid", "_encoding", "smid", "qualifier", "ms3_c", "spia"
+    )
+    private val GOOGLE_SEARCH_ONLY_KEYS = setOf(
+        "ved", "ei", "gs_lcrp", "gs_lp", "gs_ssp", "oq", "esrc", "uact", "cad", "gws_rd", "sei",
+        "sa", "dpr", "usg", "aqs", "sourceid", "sxsrf", "rlz", "pcampaignid", "sca_esv",
+        "sca_upv", "iflsig", "fbs", "ictx", "cshid"
+    )
+    private val EBAY_HOST = Regex("""(?:.*\.)?ebay\.(?:[a-z]{2,3}|(?:co|com)\.[a-z]{2})""")
+    private val BING_HOST = Regex("""(?:.*\.)?bing\.(?:[a-z]{2,3}|(?:co|com)\.[a-z]{2})""")
+    private val AIRBNB_HOST = Regex("""(?:.*\.)?airbnb\.(?:[a-z]{2,3}|(?:co|com)\.[a-z]{2})""")
+    private val GOOGLE_SEARCH_HOST = Regex("""(?:www\.)?google\.(?:[a-z]{2,3}|(?:co|com)\.[a-z]{2})""")
 
     fun clean(text: String): String? = cleanWithReport(text)?.cleanedText
 
@@ -254,9 +336,20 @@ object UrlCleaner {
         isReddit(h) -> key in REDDIT_ONLY_KEYS
         isPinterest(h) -> key in PINTEREST_ONLY_KEYS
         isMetaRedirector(h) -> key in META_REDIRECTOR_KEYS || key.startsWith("ig")
-        isTwitter(h) -> key == "s" || key == "t"
+        isTwitter(h) -> key in TWITTER_ONLY_KEYS
         isTikTok(h) -> key in TIKTOK_ONLY_KEYS
-        isAmazon(h) -> key.startsWith("pd_rd_") || key.startsWith("pf_rd_") || key == "ref_" || key == "tag"
+        isAmazon(h) -> key.startsWith("pd_rd_") || key.startsWith("pf_rd_") || key in AMAZON_ONLY_KEYS
+        isFacebook(h) -> key in FACEBOOK_ONLY_KEYS || key.startsWith("hc_") ||
+            key.startsWith("__cft__") || key.startsWith("__xts__")
+        isLinkedIn(h) -> key in LINKEDIN_ONLY_KEYS
+        isSnapchat(h) -> key in SNAPCHAT_ONLY_KEYS
+        EBAY_HOST.matches(h) -> key in EBAY_ONLY_KEYS
+        h == "netflix.com" || h.endsWith(".netflix.com") -> key in NETFLIX_ONLY_KEYS
+        BING_HOST.matches(h) -> key in BING_ONLY_KEYS
+        h == "imdb.com" || h.endsWith(".imdb.com") -> key == "ref_" || key.startsWith("pf_rd_")
+        h == "etsy.com" || h.endsWith(".etsy.com") -> key in ETSY_ONLY_KEYS
+        AIRBNB_HOST.matches(h) -> key in AIRBNB_ONLY_KEYS
+        GOOGLE_SEARCH_HOST.matches(h) -> key in GOOGLE_SEARCH_ONLY_KEYS
         else -> false
     }
 
@@ -286,6 +379,12 @@ object UrlCleaner {
     private fun isTikTok(h: String) = h == "tiktok.com" || h.endsWith(".tiktok.com")
 
     private fun isAmazon(h: String) = h.contains("amazon.")
+
+    private fun isFacebook(h: String) = h == "facebook.com" || h.endsWith(".facebook.com")
+
+    private fun isLinkedIn(h: String) = h == "linkedin.com" || h.endsWith(".linkedin.com")
+
+    private fun isSnapchat(h: String) = h == "snapchat.com" || h.endsWith(".snapchat.com")
 
     private fun isMetaSocial(h: String) =
         h == "instagram.com" || h == "instagr.am" || h.endsWith(".instagram.com") ||
