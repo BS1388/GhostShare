@@ -15,7 +15,6 @@
     <string name="msg_browser_not_found">امکان باز کردن مرورگر یافت نشد</string>
 
     <string name="title_section_how_it_works">نحوه کارکرد ماژول</string>
-    <string name="title_section_platforms">پلتفرم‌های تحت پوشش</string>
     <string name="title_section_community">سورس‌کد و مشارکت</string>
 
     <!-- وضعیت ماژول در چارچوب سیستم -->
@@ -49,14 +48,6 @@
     <string name="title_how_it_works">عملکرد سراسری در پس‌زمینه</string>
     <string name="desc_how_it_works">ماژول GhostShare با تزریق به هسته سیستم‌عامل (system_server) و کلیپ‌بورد، کلیه لینک‌های کپی شده را به صورت آنی پایش کرده و پارامترهای رهگیری تبلیغاتی و تحلیلی را بدون تغییر در محتوای اصلی حذف می‌نماید.</string>
 
-    <!-- کارت پلتفرم‌ها -->
-    <string name="desc_platforms_overview">تمامی پارامترهای رهگیری در پلتفرم‌های پرکاربرد زیر به صورت هوشمند و بدون شکستن لینک پاک‌سازی می‌شوند:</string>
-    <string name="chip_youtube">🎬 یوتیوب و یوتیوب موزیک</string>
-    <string name="chip_instagram">📸 اینستاگرام و تردز</string>
-    <string name="chip_spotify">🎵 اسپوتیفای و ساندکلاد</string>
-    <string name="chip_reddit">💬 ردیت و پینترست</string>
-    <string name="chip_twitter">✖ ایکس (توییتر)</string>
-    <string name="chip_tiktok">📱 تیک‌تاک و گوگل</string>
 
     <string name="tracker_youtube">یوتیوب و یوتیوب موزیک</string>
     <string name="tracker_spotify">اسپوتیفای</string>

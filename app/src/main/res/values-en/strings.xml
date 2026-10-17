@@ -15,7 +15,6 @@
     <string name="msg_browser_not_found">Could not find a web browser</string>
 
     <string name="title_section_how_it_works">How It Works</string>
-    <string name="title_section_platforms">Supported Platforms</string>
     <string name="title_section_community">Source Code &amp; Community</string>
 
     <!-- System Framework Module Status -->
@@ -49,14 +48,6 @@
     <string name="title_how_it_works">Global Background Operation</string>
     <string name="desc_how_it_works">GhostShare hooks into the Android OS core (system_server) and ClipboardManager to intercept copied links instantly, stripping advertising and analytic tracking parameters without breaking original content.</string>
 
-    <!-- Supported Platforms Card -->
-    <string name="desc_platforms_overview">Tracking parameters across the following popular platforms are stripped cleanly without breaking functionality:</string>
-    <string name="chip_youtube">🎬 YouTube &amp; YT Music</string>
-    <string name="chip_instagram">📸 Instagram &amp; Threads</string>
-    <string name="chip_spotify">🎵 Spotify &amp; SoundCloud</string>
-    <string name="chip_reddit">💬 Reddit &amp; Pinterest</string>
-    <string name="chip_twitter">✖ X (Twitter)</string>
-    <string name="chip_tiktok">📱 TikTok &amp; Google</string>
 
     <string name="tracker_youtube">YouTube &amp; YouTube Music</string>
     <string name="tracker_spotify">Spotify</string>
