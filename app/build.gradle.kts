@@ -11,8 +11,8 @@ android {
         applicationId = "io.github.bs1388.ghostshare"
         minSdk = 27
         targetSdk = 35
-        versionCode = 110
-        versionName = "1.1.0"
+        versionCode = 130
+        versionName = "1.3.0"
     }
 
     buildTypes {
