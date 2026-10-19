@@ -13,6 +13,27 @@ object UrlCleaner {
     private const val MAX_URL_LENGTH = 4_096
     private const val MAX_RECURSION_DEPTH = 3
 
+    @Volatile
+    var redirectUnwrapEnabled: Boolean = true
+
+    @Volatile
+    var builtinExceptionsEnabled: Boolean = true
+
+    @Volatile
+    var userExceptionDomains: Set<String> = emptySet()
+
+    private val REDIRECT_REGEXES: List<Regex> by lazy {
+        ClearUrlsData.REDIRECTIONS.mapNotNull { pattern ->
+            try { Regex(pattern) } catch (_: Throwable) { null }
+        }
+    }
+
+    private val EXCEPTION_REGEXES: List<Regex> by lazy {
+        ClearUrlsData.EXCEPTIONS.mapNotNull { pattern ->
+            try { Regex(pattern) } catch (_: Throwable) { null }
+        }
+    }
+
     private val URL_REGEX = Regex(
         """(?i)(?:https?://|(?<![\w.-])www\.)[^\s<>"'{}|\\^`\[\]]+"""
     )
@@ -216,6 +237,15 @@ object UrlCleaner {
             return null
         }
 
+        if (isExcepted(url)) return null
+
+        if (redirectUnwrapEnabled) {
+            val target = unwrapRedirect(url)
+            if (target != null) {
+                return cleanUrlString(target, depth + 1) ?: target
+            }
+        }
+
         val uri = try {
             Uri.parse(url)
         } catch (_: Throwable) {
@@ -263,6 +293,35 @@ object UrlCleaner {
         } catch (_: Throwable) {
             null
         }
+    }
+
+    private fun isExcepted(url: String): Boolean {
+        val domains = userExceptionDomains
+        if (domains.isNotEmpty()) {
+            val host = try { Uri.parse(url).host?.lowercase() } catch (_: Throwable) { null }
+            if (host != null && domains.any { host == it || host.endsWith(".$it") }) return true
+        }
+        if (!builtinExceptionsEnabled) return false
+        return EXCEPTION_REGEXES.any { it.containsMatchIn(url) }
+    }
+
+    private fun unwrapRedirect(url: String): String? {
+        if (!url.startsWith("http", ignoreCase = true)) return null
+        for (regex in REDIRECT_REGEXES) {
+            val match = regex.find(url) ?: continue
+            val raw = match.groupValues.getOrNull(1) ?: continue
+            val target = normalizeRedirectTarget(Uri.decode(raw)) ?: continue
+            if (target != url) return target
+        }
+        return null
+    }
+
+    private fun normalizeRedirectTarget(value: String): String? {
+        val v = value.trim()
+        if (v.isEmpty() || v.length > MAX_URL_LENGTH) return null
+        if (v.startsWith("http://", ignoreCase = true) || v.startsWith("https://", ignoreCase = true)) return v
+        val hostPart = v.substringBefore('/')
+        return if (hostPart.contains('.') && !hostPart.contains(' ') && !hostPart.contains(':')) "https://$v" else null
     }
 
     private fun cleanQueryString(query: String, host: String?, depth: Int): String? {

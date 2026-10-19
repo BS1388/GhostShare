@@ -15,6 +15,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PersistableBundle
 import android.os.SystemClock
+import android.provider.Settings
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
@@ -48,6 +49,15 @@ class HookEntry : IXposedHookLoadPackage {
 
         @Volatile
         private var showRestoreNotification = true
+
+        @Volatile
+        private var config = GhostConfig()
+
+        @Volatile
+        private var appConfig: GhostConfig? = null
+
+        @Volatile
+        private var appConfigTimestamp = 0L
 
         @Volatile
         private var systemReceiversRegistered = false
@@ -441,6 +451,16 @@ class HookEntry : IXposedHookLoadPackage {
             return
         }
 
+        if (!systemReceiversRegistered) {
+            ensureSystemContext(param.thisObject)
+            systemContext?.let { registerSystemReceivers(it) }
+        }
+
+        if (!config.shouldClean(callingPackage)) {
+            XposedBridge.log("[$TAG] Per-app rule: skipping ${if (callingPackage.isNotEmpty()) callingPackage else "unknown"}")
+            return
+        }
+
         val cleanResult = cleanClipData(originalClip) ?: return
 
         param.args[clipIndex] = cleanResult.newClip
@@ -502,6 +522,8 @@ class HookEntry : IXposedHookLoadPackage {
             val firstText = originalClip.getItemAt(0)?.text?.toString()
             if (isRecentlyRestored(firstText)) return
 
+            if (!appLayerAllowed(param.thisObject, packageName)) return
+
             val cleanResult = cleanClipData(originalClip) ?: return
             param.args[clipIndex] = cleanResult.newClip
 
@@ -529,6 +551,7 @@ class HookEntry : IXposedHookLoadPackage {
             val text = param.args.getOrNull(0) as? CharSequence ?: return
             val textStr = text.toString()
             if (isRecentlyRestored(textStr)) return
+            if (!appLayerAllowed(param.thisObject, packageName)) return
 
             val report = UrlCleaner.cleanWithReport(textStr) ?: return
             param.args[0] = report.cleanedText
@@ -729,6 +752,7 @@ class HookEntry : IXposedHookLoadPackage {
                                     )
                                     showRestoreNotification = enabled
                                     XposedBridge.log("[$TAG] Settings updated live: showRestoreNotification = $enabled")
+                                    GhostConfig.decode(intent.getStringExtra(Constants.EXTRA_CONFIG))?.let { applyConfig(it, ctx) }
                                 }
                                 Constants.ACTION_CHECK_STATUS -> {
                                     resultCode = Activity.RESULT_OK
@@ -786,11 +810,70 @@ class HookEntry : IXposedHookLoadPackage {
                 // بارگذاری تنظیمات بدون نگه داشتن قفل روی ترد جاری
                 getMainHandler()?.post {
                     showRestoreNotification = loadSettingsFromApp(ctx)
+                    applyConfig(loadConfigFromApp(ctx) ?: config, ctx)
                 }
             } catch (t: Throwable) {
                 XposedBridge.log("[$TAG] Warning: could not register system receivers: ${t.message}")
             }
         }
+    }
+
+    private fun applyConfig(newConfig: GhostConfig, ctx: Context?) {
+        config = newConfig
+        newConfig.applyToCleaner()
+        if (ctx != null) {
+            try {
+                Settings.Global.putString(ctx.contentResolver, Constants.GLOBAL_SETTING_KEY, newConfig.encode())
+            } catch (t: Throwable) {
+                XposedBridge.log("[$TAG] Could not mirror config for app processes: ${t.message}")
+            }
+        }
+        XposedBridge.log("[$TAG] Config applied: perApp=${newConfig.perAppEnabled}(${newConfig.perAppPackages.size}) bypass=${newConfig.bypassEnabled}(${newConfig.bypassPackages.size}) redirect=${newConfig.redirectUnwrap} exceptions=${newConfig.userExceptions.size}")
+    }
+
+    private fun mirroredConfig(thisObject: Any?): GhostConfig? {
+        val now = SystemClock.elapsedRealtime()
+        if (now - appConfigTimestamp < 3000L) return appConfig
+        val ctx = getContextFromObject(thisObject) ?: return appConfig
+        val raw = try {
+            Settings.Global.getString(ctx.contentResolver, Constants.GLOBAL_SETTING_KEY)
+        } catch (_: Throwable) {
+            null
+        }
+        appConfig = GhostConfig.decode(raw)
+        appConfigTimestamp = now
+        return appConfig
+    }
+
+    private fun appLayerAllowed(thisObject: Any?, packageName: String): Boolean {
+        val cfg = mirroredConfig(thisObject) ?: return true
+        cfg.applyToCleaner()
+        return cfg.shouldClean(packageName)
+    }
+
+    private fun loadConfigFromApp(ctx: Context): GhostConfig? {
+        for (pkg in listOf("io.github.bs1388.ghostshare", "ir.ghostshare")) {
+            try {
+                val appCtx = ctx.createPackageContext(pkg, Context.CONTEXT_IGNORE_SECURITY)
+                val sp = appCtx.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+                if (GhostConfig.hasStoredValues(sp)) return GhostConfig.fromPrefs(sp)
+            } catch (_: Throwable) {}
+
+            try {
+                val paths = listOf(
+                    "/data/user/0/$pkg/shared_prefs/${Constants.PREFS_NAME}.xml",
+                    "/data/data/$pkg/shared_prefs/${Constants.PREFS_NAME}.xml"
+                )
+                for (path in paths) {
+                    val file = File(path)
+                    if (file.exists() && file.canRead()) {
+                        val parsed = GhostConfig.fromPrefsXml(file.readText())
+                        if (parsed != null) return parsed
+                    }
+                }
+            } catch (_: Throwable) {}
+        }
+        return null
     }
 
     private fun loadSettingsFromApp(ctx: Context): Boolean {

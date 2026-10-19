@@ -7,6 +7,18 @@ package ir.ghostshare
 object Constants {
     const val PREFS_NAME = "ghostshare_prefs"
     const val PREF_SHOW_RESTORE_NOTIFICATION = "show_restore_notification"
+    const val PREF_REDIRECT_UNWRAP = "redirect_unwrap"
+    const val PREF_BUILTIN_EXCEPTIONS = "builtin_exceptions"
+    const val PREF_PER_APP_ENABLED = "per_app_enabled"
+    const val PREF_PER_APP_PACKAGES = "per_app_packages"
+    const val PREF_BYPASS_ENABLED = "bypass_enabled"
+    const val PREF_BYPASS_PACKAGES = "bypass_packages"
+    const val PREF_USER_EXCEPTIONS = "user_exceptions"
+    const val EXTRA_CONFIG = "config"
+    const val GLOBAL_SETTING_KEY = "ghostshare_config"
+    const val EXTRA_PICKER_MODE = "picker_mode"
+    const val MODE_PER_APP = "per_app"
+    const val MODE_BYPASS = "bypass"
 
     // اکشن و اکسترا جهت همگام‌سازی لحظه‌ای تنظیمات با پروسه system_server
     const val ACTION_UPDATE_SETTINGS = "ir.ghostshare.ACTION_UPDATE_SETTINGS"

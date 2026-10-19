@@ -69,4 +69,38 @@
         <item>android</item>
         <item>io.github.bs1388.ghostshare</item>
     </string-array>
+
+    <string name="title_section_per_app">Per-app settings</string>
+    <string name="title_per_app_enable">Enable per-app</string>
+    <string name="desc_per_app_enable">Clean links only when they are copied from the apps you choose. Every other app is left untouched.</string>
+    <string name="title_bypass_mode">Bypass Mode</string>
+    <string name="desc_bypass_mode">Links copied from the apps you choose are never cleaned. Everything else works as usual.</string>
+    <string name="label_choose_apps">Choose apps</string>
+    <string name="label_no_apps_selected">None selected</string>
+    <string name="fmt_apps_selected">%d apps</string>
+    <string name="title_section_filters">Links &amp; exceptions</string>
+    <string name="title_redirect">Resolve redirect links</string>
+    <string name="desc_redirect">Replaces wrapper links such as l.facebook.com or google.com/url with the real destination.</string>
+    <string name="title_builtin_exceptions">ClearURLs exceptions</string>
+    <string name="desc_builtin_exceptions">Skip pages where cleaning would break the link, such as GitHub, Google sign-in and Stripe.</string>
+    <string name="title_excluded_sites">Excluded websites</string>
+    <string name="desc_excluded_sites">Links from these sites are never changed</string>
+    <string name="label_none_added">None</string>
+    <string name="fmt_sites_count">%d sites</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_remove">Remove</string>
+    <string name="title_pick_per_app">Apps for per-app cleaning</string>
+    <string name="desc_pick_per_app">Cleaning is active only for the apps you tick.</string>
+    <string name="title_pick_bypass">Apps to bypass</string>
+    <string name="desc_pick_bypass">Links copied from the apps you tick are left as they are.</string>
+    <string name="hint_search_apps">Search apps</string>
+    <string name="label_show_system">Show system apps</string>
+    <string name="label_no_apps">No apps found</string>
+    <string name="desc_exceptions_screen">Links from these websites and their subdomains are never changed. You can paste a full link or just the domain.</string>
+    <string name="hint_add_domain">example.com</string>
+    <string name="btn_add">Add</string>
+    <string name="label_empty_exceptions">No websites added yet</string>
+    <string name="msg_invalid_domain">Enter a valid domain</string>
+    <string name="msg_domain_exists">Already in the list</string>
+    <string name="fmt_builtin_note">Besides this list, %d built-in ClearURLs exceptions are applied while that option is on.</string>
 </resources>
