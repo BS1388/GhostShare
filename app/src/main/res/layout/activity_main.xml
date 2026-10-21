@@ -263,258 +263,19 @@
             </LinearLayout>
         </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/title_section_per_app"
-            android:textColor="@color/m3_sys_color_primary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:background="@drawable/bg_m3_card"
-            android:clipToOutline="true"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-            <FrameLayout
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_marginEnd="14dp"
-                android:background="@drawable/bg_m3_icon_box_tertiary">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/title_per_app_enable"
-                    android:src="@drawable/ic_apps" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_per_app_enable"
-                    android:textColor="@color/m3_sys_color_on_surface"
-                    android:textSize="15.5sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:lineSpacingExtra="2dp"
-                    android:text="@string/desc_per_app_enable"
-                    android:textColor="@color/m3_sys_color_on_surface_variant"
-                    android:textSize="12.5sp" />
-            </LinearLayout>
-
-            <Switch
-                android:id="@+id/switch_per_app"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:thumb="@drawable/m3_switch_thumb"
-                android:track="@drawable/m3_switch_track" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="@color/m3_sys_color_outline_variant" />
-
-            <LinearLayout
-                android:id="@+id/row_per_app_choose"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:minHeight="52dp"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingTop="12dp"
-                android:paddingEnd="12dp"
-                android:paddingBottom="12dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/label_choose_apps"
-                    android:textColor="@color/m3_sys_color_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_per_app_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
-                    android:textColor="@color/m3_sys_color_on_surface_variant"
-                    android:textSize="12.5sp" />
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_chevron_right" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
+            android:id="@+id/card_advanced"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="28dp"
             android:background="@drawable/bg_m3_card"
+            android:clickable="true"
             android:clipToOutline="true"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-            <FrameLayout
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_marginEnd="14dp"
-                android:background="@drawable/bg_m3_icon_box_secondary">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/title_bypass_mode"
-                    android:src="@drawable/ic_block" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_bypass_mode"
-                    android:textColor="@color/m3_sys_color_on_surface"
-                    android:textSize="15.5sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:lineSpacingExtra="2dp"
-                    android:text="@string/desc_bypass_mode"
-                    android:textColor="@color/m3_sys_color_on_surface_variant"
-                    android:textSize="12.5sp" />
-            </LinearLayout>
-
-            <Switch
-                android:id="@+id/switch_bypass"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:thumb="@drawable/m3_switch_thumb"
-                android:track="@drawable/m3_switch_track" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="@color/m3_sys_color_outline_variant" />
-
-            <LinearLayout
-                android:id="@+id/row_bypass_choose"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:minHeight="52dp"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingTop="12dp"
-                android:paddingEnd="12dp"
-                android:paddingBottom="12dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/label_choose_apps"
-                    android:textColor="@color/m3_sys_color_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_bypass_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
-                    android:textColor="@color/m3_sys_color_on_surface_variant"
-                    android:textSize="12.5sp" />
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_chevron_right" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/title_section_filters"
-            android:textColor="@color/m3_sys_color_primary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:background="@drawable/bg_m3_card"
-            android:clipToOutline="true"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
+            android:focusable="true"
+            android:foreground="@drawable/bg_m3_ripple_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
 
             <FrameLayout
                 android:layout_width="42dp"
@@ -526,8 +287,8 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:layout_gravity="center"
-                    android:contentDescription="@string/title_redirect"
-                    android:src="@drawable/ic_link" />
+                    android:contentDescription="@string/title_advanced_settings"
+                    android:src="@drawable/ic_tune" />
             </FrameLayout>
 
             <LinearLayout
@@ -538,154 +299,24 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/title_redirect"
+                    android:text="@string/title_advanced_settings"
+                    android:textAlignment="viewStart"
                     android:textColor="@color/m3_sys_color_on_surface"
                     android:textSize="15.5sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
                     android:lineSpacingExtra="2dp"
-                    android:text="@string/desc_redirect"
+                    android:text="@string/desc_advanced_settings"
+                    android:textAlignment="viewStart"
                     android:textColor="@color/m3_sys_color_on_surface_variant"
                     android:textSize="12.5sp" />
             </LinearLayout>
-
-            <Switch
-                android:id="@+id/switch_redirect"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:thumb="@drawable/m3_switch_thumb"
-                android:track="@drawable/m3_switch_track" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:background="@drawable/bg_m3_card"
-            android:clipToOutline="true"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-            <FrameLayout
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_marginEnd="14dp"
-                android:background="@drawable/bg_m3_icon_box_secondary">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/title_builtin_exceptions"
-                    android:src="@drawable/ic_shield_check" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_builtin_exceptions"
-                    android:textColor="@color/m3_sys_color_on_surface"
-                    android:textSize="15.5sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:lineSpacingExtra="2dp"
-                    android:text="@string/desc_builtin_exceptions"
-                    android:textColor="@color/m3_sys_color_on_surface_variant"
-                    android:textSize="12.5sp" />
-            </LinearLayout>
-
-            <Switch
-                android:id="@+id/switch_builtin_exceptions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:thumb="@drawable/m3_switch_thumb"
-                android:track="@drawable/m3_switch_track" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/row_exceptions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="28dp"
-            android:background="@drawable/bg_m3_card"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="@drawable/bg_m3_ripple_card"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <FrameLayout
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_marginEnd="14dp"
-                android:background="@drawable/bg_m3_icon_box_tertiary">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/title_excluded_sites"
-                    android:src="@drawable/ic_public" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_excluded_sites"
-                    android:textColor="@color/m3_sys_color_on_surface"
-                    android:textSize="15.5sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:lineSpacingExtra="2dp"
-                    android:text="@string/desc_excluded_sites"
-                    android:textColor="@color/m3_sys_color_on_surface_variant"
-                    android:textSize="12.5sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_exceptions_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:textColor="@color/m3_sys_color_on_surface_variant"
-                android:textSize="12.5sp" />
 
             <ImageView
                 android:layout_width="20dp"

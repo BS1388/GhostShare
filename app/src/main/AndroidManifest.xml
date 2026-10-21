@@ -44,14 +44,8 @@
         </activity>
 
         <activity
-            android:name=".AppPickerActivity"
-            android:configChanges="uiMode|screenSize|orientation"
-            android:exported="false"
-            android:theme="@style/Theme.GhostShare" />
-
-        <activity
-            android:name=".ExceptionsActivity"
-            android:configChanges="uiMode|screenSize|orientation"
+            android:name=".SettingsActivity"
+            android:configChanges="uiMode|screenSize|orientation|layoutDirection"
             android:exported="false"
             android:theme="@style/Theme.GhostShare" />
 

@@ -60,6 +60,9 @@ class HookEntry : IXposedHookLoadPackage {
         private var appConfigTimestamp = 0L
 
         @Volatile
+        private var appliedAppConfig: GhostConfig? = null
+
+        @Volatile
         private var systemReceiversRegistered = false
 
         // کش درون‌حافظه‌ای لینک‌های به‌تازگی بازگردانده شده جهت جلوگیری ۱۰۰٪ از لوپ پردازش
@@ -823,12 +826,12 @@ class HookEntry : IXposedHookLoadPackage {
         newConfig.applyToCleaner()
         if (ctx != null) {
             try {
-                Settings.Global.putString(ctx.contentResolver, Constants.GLOBAL_SETTING_KEY, newConfig.encode())
+                Settings.Global.putString(ctx.contentResolver, Constants.GLOBAL_SETTING_KEY, newConfig.encodeForMirror())
             } catch (t: Throwable) {
                 XposedBridge.log("[$TAG] Could not mirror config for app processes: ${t.message}")
             }
         }
-        XposedBridge.log("[$TAG] Config applied: perApp=${newConfig.perAppEnabled}(${newConfig.perAppPackages.size}) bypass=${newConfig.bypassEnabled}(${newConfig.bypassPackages.size}) redirect=${newConfig.redirectUnwrap} exceptions=${newConfig.userExceptions.size}")
+        XposedBridge.log("[$TAG] Config applied: perApp=${newConfig.perAppEnabled}(${newConfig.perAppPackages.size}) bypass=${newConfig.bypassEnabled}(${newConfig.bypassPackages.size}) redirect=${newConfig.redirectUnwrap} params=+${newConfig.addedParameters.size}/-${newConfig.removedParameters.size} exceptions=${newConfig.exceptionDomains.size}/${newConfig.exceptionParameters.size}")
     }
 
     private fun mirroredConfig(thisObject: Any?): GhostConfig? {
@@ -847,7 +850,11 @@ class HookEntry : IXposedHookLoadPackage {
 
     private fun appLayerAllowed(thisObject: Any?, packageName: String): Boolean {
         val cfg = mirroredConfig(thisObject) ?: return true
-        cfg.applyToCleaner()
+        if (cfg.appLayerDisabled) return false
+        if (cfg !== appliedAppConfig) {
+            cfg.applyToCleaner()
+            appliedAppConfig = cfg
+        }
         return cfg.shouldClean(packageName)
     }
 

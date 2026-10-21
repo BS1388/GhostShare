@@ -17,19 +17,16 @@ object UrlCleaner {
     var redirectUnwrapEnabled: Boolean = true
 
     @Volatile
-    var builtinExceptionsEnabled: Boolean = true
+    var exceptionDomains: Set<String> = emptySet()
 
     @Volatile
-    var userExceptionDomains: Set<String> = emptySet()
+    var matcher: ParameterMatcher = ParameterMatcher.of(DefaultParameters.ALL)
+
+    @Volatile
+    var protectedMatcher: ParameterMatcher = ParameterMatcher.EMPTY
 
     private val REDIRECT_REGEXES: List<Regex> by lazy {
         ClearUrlsData.REDIRECTIONS.mapNotNull { pattern ->
-            try { Regex(pattern) } catch (_: Throwable) { null }
-        }
-    }
-
-    private val EXCEPTION_REGEXES: List<Regex> by lazy {
-        ClearUrlsData.EXCEPTIONS.mapNotNull { pattern ->
             try { Regex(pattern) } catch (_: Throwable) { null }
         }
     }
@@ -40,112 +37,6 @@ object UrlCleaner {
 
     private val TRAILING_PUNCTUATION = charArrayOf(
         '.', ',', ';', ':', '!', '?', '،', '؛', '؟', '»', '”', '’', '"', '\'', '>', '~'
-    )
-
-    private val META_KEYS = setOf(
-        "igsh", "igsi", "igshid", "stkn", "sktn",
-        "fbclid", "mibextid", "rdid", "sfnsn", "xmt", "slof"
-    )
-    private val GOOGLE_KEYS = setOf(
-        "gclid", "gclsrc", "dclid", "gbraid", "wbraid",
-        "gad_source", "srsltid", "_ga", "_gl", "gtm_debug", "usqp"
-    )
-    private val YOUTUBE_KEYS = setOf("si", "feature", "pp")
-    private val TWITTER_KEYS = setOf("twclid", "ref_src", "ref_url")
-    private val TIKTOK_KEYS = setOf("ttclid")
-    private val SPOTIFY_KEYS = setOf("nd")
-    private val MICROSOFT_KEYS = setOf("msclkid", "cvid", "form", "ocid")
-    private val YAHOO_KEYS = setOf("soc_src", "soc_trk")
-    private val LINKEDIN_KEYS = setOf("li_fat_id", "trackingid")
-    private val REDDIT_KEYS = setOf("rdt_cid", "share_id")
-    private val PINTEREST_KEYS = setOf("epik", "invite_code")
-    private val AFFILIATE_KEYS = setOf(
-        "spm", "scm", "aff_fcid", "aff_fsk", "aff_platform", "aff_trace_key",
-        "irclickid", "cjevent", "cjdata", "tduid", "shareasale", "gci"
-    )
-    private val MARKETING_KEYS = setOf(
-        "mc_cid", "mc_eid", "mkt_tok", "_hsenc", "_hsmi",
-        "vero_id", "vero_conv", "yclid", "_openstat", "wickedid"
-    )
-    private val ADS_KEYS = setOf(
-        "sccid", "qclid", "tblci", "dicbo", "ymclid", "ysclid", "awclid", "ad_id",
-        "oicd", "vmcid", "afid", "guce_referrer", "guce_referrer_sig", "auctid",
-        "unicorn_click_id", "_z1_agid", "_z1_caid", "_z1_msid", "_z1_pub"
-    )
-    private val EMAIL_KEYS = setOf(
-        "__hsfp", "__hssc", "__hstc", "hsctatracking", "_kx", "_ke", "_bhlid", "bbeml",
-        "ml_subscriber", "ml_subscriber_hash", "ck_subscriber_id", "ct_params",
-        "bsft_clkid", "bsft_uid", "omnisendcontactid", "sc_customer", "sc_eh", "sc_uid",
-        "ss_email_id", "__s", "vgo_ee", "et_rid", "at_recipient_id", "at_recipient_list",
-        "h_sid", "h_slt"
-    )
-    private val ANALYTICS_KEYS = setOf(
-        "adobe_mc_ref", "adobe_mc_sdid", "ef_id", "s_cid", "s_kwcid",
-        "_branch_match_id", "_branch_referrer", "mtm_cid", "pk_cid", "wt.mc_id",
-        "oft_c", "oft_campaign", "oft_ck", "oft_d", "oft_id", "oft_ids", "oft_k",
-        "oft_lk", "oft_sk", "oly_anon_id", "oly_enc_id", "otc", "icid", "rb_clickid",
-        "subafid", "cn_reloaded", "ao_noptimize"
-    )
-    private val GENERIC_KEYS = setOf("cid", "clickid", "eid", "campaign")
-    private val MYTRACKER_KEYS = setOf(
-        "mt_click_id", "mt_network", "mt_campaign", "mt_adset", "mt_creative", "mt_medium",
-        "mt_sub1", "mt_sub2", "mt_sub3", "mt_sub4", "mt_sub5", "mt_link_id"
-    )
-    private val ADJUST_KEYS = setOf(
-        "adj_label", "adj_campaign", "adj_creative", "gps_adid", "adjust_creative",
-        "adjust_tracker_limit", "adjust_tracker", "adjust_adgroup", "adjust_campaign",
-        "adjust_referrer"
-    )
-    private val APPSFLYER_KEYS = setOf(
-        "af_xp", "af_ad", "af_adset", "af_click_lookback", "af_force_deeplink",
-        "is_retargeting"
-    )
-    private val AT_INTERNET_KEYS = setOf(
-        "at_campaign", "at_campaign_type", "at_creation", "at_emailtype", "at_link",
-        "at_link_id", "at_link_origin", "at_link_type", "at_medium", "at_ptr_name",
-        "at_send_date"
-    )
-    private val CAMPAIGN_KEYS = setOf(
-        "tw_medium", "tw_profile_id", "tw_source", "_sgm_campaign", "_sgm_term",
-        "_sgm_pinned", "ebisother1", "ebisother2", "ebisother3", "ebisother4", "ebisother5",
-        "vsm_type", "vsm_cid", "vsm_pid", "sms_click", "sms_source", "sms_uph", "cm_me",
-        "cm_cr", "ir_campaignid", "ir_adid", "ir_partnerid", "pk_vid", "_sgm_source",
-        "_sgm_action", "int_content", "int_term", "int_source", "int_medium",
-        "int_campaign", "itm_source", "itm_medium", "itm_campaign", "itm_content",
-        "itm_term", "dpg_source", "dpg_campaign", "dpg_medium", "dpg_content", "bsft_eid",
-        "bsft_mid", "bsft_aaid", "bsft_ek", "pk_campaign", "pk_medium", "pk_source",
-        "ebisadid"
-    )
-    private val MORE_TRACKING_KEYS = setOf(
-        "pjclid", "x-clickref", "x-source", "x-a-medium", "ranmid", "raneaid", "ransiteid",
-        "eml-name", "eml-mediaplan", "eml-publisher", "eurl", "link_source", "taid",
-        "tgclid", "analytics_context", "analytics_trace_id", "bance_xuid", "winflncrtag",
-        "ftag", "janet", "vs_campaign_id", "adsterra_clid", "adsterra_placement_id",
-        "loclid", "ldtag_cl", "lt_r", "srclt", "_ly_c", "_ly_r", "yj_r", "line_uid",
-        "adc_publisher", "adc_token", "uzcid", "beyond_uzcvid", "beyond_uzmcvid",
-        "bemobdata", "_bdadid", "recommended_by", "recommended_code",
-        "personaclick_search_query", "personaclick_input_query", "ems_dl", "emcs_t",
-        "cstrackid", "btag", "jmtyclid", "tcsack", "_ope", "spot_im_redirect_source",
-        "iclid", "user_email_address", "sscid", "rtkcid", "__io_lv", "_io_session_id",
-        "asgtbndr", "ymid", "mindbox-click-id", "famad_xuid", "cx_click", "cx_recsorder",
-        "cx_recswidget", "mindbox-message-key", "awc", "clckid", "ym_tracking_id",
-        "aiad_clid", "maf", "_clde", "_cldee", "oprtrack", "xtor", "gad_campaignid",
-        "admitad_uid", "external_click_id", "irgwc", "fbadid", "nb_placement",
-        "nb_expid_meta", "adfrom", "nx_source", "_zucks_suid", "guccounter", "vc_lpp",
-        "gs_l", "hmb_campaign", "hmb_medium", "hmb_source", "os_ehash",
-        "__twitter_impression", "wt_zmc", "wtrid", "echobox", "tracking_source", "ceneo_spo"
-    )
-
-    private val GLOBAL_TRACKING_KEYS: Set<String> =
-        META_KEYS + GOOGLE_KEYS + YOUTUBE_KEYS + TWITTER_KEYS + TIKTOK_KEYS +
-            SPOTIFY_KEYS + MICROSOFT_KEYS + YAHOO_KEYS + LINKEDIN_KEYS +
-            REDDIT_KEYS + PINTEREST_KEYS + AFFILIATE_KEYS + MARKETING_KEYS +
-            ADS_KEYS + EMAIL_KEYS + ANALYTICS_KEYS + GENERIC_KEYS +
-            MYTRACKER_KEYS + ADJUST_KEYS + APPSFLYER_KEYS + AT_INTERNET_KEYS + CAMPAIGN_KEYS + MORE_TRACKING_KEYS
-
-    private val GLOBAL_TRACKING_PREFIXES = arrayOf(
-        "utm_", "fb_", "hsa_", "action_object_", "action_type_", "action_ref_",
-        "mtm_", "ga_", "otm_", "vn_", "at_custom", "cm_mmc"
     )
 
     private val YOUTUBE_PROTECTED_KEYS = setOf("v", "t", "start", "list", "index")
@@ -296,13 +187,10 @@ object UrlCleaner {
     }
 
     private fun isExcepted(url: String): Boolean {
-        val domains = userExceptionDomains
-        if (domains.isNotEmpty()) {
-            val host = try { Uri.parse(url).host?.lowercase() } catch (_: Throwable) { null }
-            if (host != null && domains.any { host == it || host.endsWith(".$it") }) return true
-        }
-        if (!builtinExceptionsEnabled) return false
-        return EXCEPTION_REGEXES.any { it.containsMatchIn(url) }
+        val domains = exceptionDomains
+        if (domains.isEmpty()) return false
+        val host = (try { Uri.parse(url).host?.lowercase() } catch (_: Throwable) { null }) ?: return false
+        return domains.any { host == it || host.endsWith(".$it") }
     }
 
     private fun unwrapRedirect(url: String): String? {
@@ -374,6 +262,8 @@ object UrlCleaner {
     }
 
     private fun isTrackingParam(key: String, host: String?): Boolean {
+        if (protectedMatcher.matches(key)) return false
+
         val h = host?.lowercase()
 
         if (h != null) {
@@ -382,8 +272,7 @@ object UrlCleaner {
             if (isReddit(h) && key == "context") return false
         }
 
-        if (key in GLOBAL_TRACKING_KEYS) return true
-        if (GLOBAL_TRACKING_PREFIXES.any { key.startsWith(it) }) return true
+        if (matcher.matches(key)) return true
 
         return h != null && isHostSpecificTracking(key, h)
     }

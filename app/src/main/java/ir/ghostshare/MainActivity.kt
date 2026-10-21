@@ -63,13 +63,6 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var tvStatusBadge: TextView
     private lateinit var ivStatusDot: ImageView
     private lateinit var switchNotification: Switch
-    private lateinit var switchPerApp: Switch
-    private lateinit var switchBypass: Switch
-    private lateinit var switchRedirect: Switch
-    private lateinit var switchBuiltinExceptions: Switch
-    private lateinit var tvPerAppCount: TextView
-    private lateinit var tvBypassCount: TextView
-    private lateinit var tvExceptionsCount: TextView
     private lateinit var cardGithub: LinearLayout
 
     // کامپوننت‌های کنترل زبان Material 3
@@ -181,7 +174,9 @@ open class MainActivity : AppCompatActivity() {
         // مقداردهی اولیه وضعیت سوئیچ
         initSwitchState()
 
-        setupFilterSettings()
+        findViewById<View>(R.id.card_advanced).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
 
         // درخواست اولیه مجوز اعلان در اندروید ۱۳ به بعد در صورت نیاز
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isNotificationPermissionGranted()) {
@@ -228,7 +223,6 @@ open class MainActivity : AppCompatActivity() {
             }
         }
         syncNotificationSwitchState()
-        refreshFilterSummaries()
 
         checkModuleStatus(silent = true)
     }
@@ -728,59 +722,4 @@ open class MainActivity : AppCompatActivity() {
     private fun notifySystemServer(showNotification: Boolean) {
         SettingsStore.broadcast(this, showNotification)
     }
-
-    private fun setupFilterSettings() {
-        switchPerApp = findViewById(R.id.switch_per_app)
-        switchBypass = findViewById(R.id.switch_bypass)
-        switchRedirect = findViewById(R.id.switch_redirect)
-        switchBuiltinExceptions = findViewById(R.id.switch_builtin_exceptions)
-        tvPerAppCount = findViewById(R.id.tv_per_app_count)
-        tvBypassCount = findViewById(R.id.tv_bypass_count)
-        tvExceptionsCount = findViewById(R.id.tv_exceptions_count)
-
-        val config = SettingsStore.load(this)
-        bindConfigSwitch(switchPerApp, config.perAppEnabled) { current, on -> current.copy(perAppEnabled = on) }
-        bindConfigSwitch(switchBypass, config.bypassEnabled) { current, on -> current.copy(bypassEnabled = on) }
-        bindConfigSwitch(switchRedirect, config.redirectUnwrap) { current, on -> current.copy(redirectUnwrap = on) }
-        bindConfigSwitch(switchBuiltinExceptions, config.builtinExceptions) { current, on ->
-            current.copy(builtinExceptions = on)
-        }
-
-        findViewById<View>(R.id.row_per_app_choose).setOnClickListener { openAppPicker(Constants.MODE_PER_APP) }
-        findViewById<View>(R.id.row_bypass_choose).setOnClickListener { openAppPicker(Constants.MODE_BYPASS) }
-        findViewById<View>(R.id.row_exceptions).setOnClickListener {
-            startActivity(Intent(this, ExceptionsActivity::class.java))
-        }
-
-        refreshFilterSummaries()
-    }
-
-    private fun bindConfigSwitch(
-        view: Switch,
-        initial: Boolean,
-        transform: (GhostConfig, Boolean) -> GhostConfig
-    ) {
-        view.isChecked = initial
-        view.setOnCheckedChangeListener { button, isChecked ->
-            button.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-            SettingsStore.update(this) { current -> transform(current, isChecked) }
-        }
-    }
-
-    private fun openAppPicker(mode: String) {
-        val intent = Intent(this, AppPickerActivity::class.java).apply {
-            putExtra(Constants.EXTRA_PICKER_MODE, mode)
-        }
-        startActivity(intent)
-    }
-
-    private fun refreshFilterSummaries() {
-        val config = SettingsStore.load(this)
-        tvPerAppCount.text = countLabel(config.perAppPackages.size, R.string.label_no_apps_selected, R.string.fmt_apps_selected)
-        tvBypassCount.text = countLabel(config.bypassPackages.size, R.string.label_no_apps_selected, R.string.fmt_apps_selected)
-        tvExceptionsCount.text = countLabel(config.userExceptions.size, R.string.label_none_added, R.string.fmt_sites_count)
-    }
-
-    private fun countLabel(count: Int, emptyRes: Int, formatRes: Int): String =
-        if (count == 0) getString(emptyRes) else getString(formatRes, count)
 }
