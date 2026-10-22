@@ -178,6 +178,9 @@ open class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
+        CrashLogger.install(this)
+        showPreviousCrashIfAny()
+
         // درخواست اولیه مجوز اعلان در اندروید ۱۳ به بعد در صورت نیاز
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isNotificationPermissionGranted()) {
             val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
@@ -717,6 +720,28 @@ open class MainActivity : AppCompatActivity() {
             tvStatusBadge.setTextColor(getColor(textColorRes))
             ivStatusDot.setColorFilter(getColor(dotColorRes))
         }
+    }
+
+    private fun showPreviousCrashIfAny() {
+        val report = CrashLogger.consume(this) ?: return
+        val padding = (16 * resources.displayMetrics.density).toInt()
+        val body = TextView(this).apply {
+            text = report
+            textSize = 11f
+            typeface = android.graphics.Typeface.MONOSPACE
+            setTextIsSelectable(true)
+            setPadding(padding, padding, padding, padding)
+        }
+        val scroll = android.widget.ScrollView(this).apply { addView(body) }
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.title_crash_report)
+            .setView(scroll)
+            .setPositiveButton(R.string.btn_copy) { _, _ ->
+                val manager = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                manager.setPrimaryClip(android.content.ClipData.newPlainText("GhostShare crash", report))
+            }
+            .setNegativeButton(R.string.btn_close, null)
+            .show()
     }
 
     private fun notifySystemServer(showNotification: Boolean) {

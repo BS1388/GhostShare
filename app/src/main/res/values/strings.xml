@@ -138,4 +138,7 @@
     <string name="err_import_structure">The file does not match the expected structure</string>
     <string name="err_import_version">Unsupported file version</string>
     <string name="err_import_read">Could not read the file</string>
+    <string name="title_crash_report">Previous crash report</string>
+    <string name="btn_copy">Copy</string>
+    <string name="btn_close">Close</string>
 </resources>

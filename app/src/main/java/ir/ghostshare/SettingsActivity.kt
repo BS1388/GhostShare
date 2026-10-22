@@ -23,12 +23,13 @@ class SettingsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        UiUtils.setupSystemBars(this)
+        CrashLogger.install(this)
         setContent {
             GhostTheme {
                 SettingsApp(onExit = { finish() })
             }
         }
+        UiUtils.setupSystemBars(this)
     }
 }
 

@@ -17,7 +17,11 @@ object UiUtils {
         window.navigationBarColor = activity.getColor(R.color.m3_sys_color_background)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val controller = window.insetsController
+            val controller = try {
+                window.insetsController
+            } catch (_: Throwable) {
+                null
+            }
             if (controller != null) {
                 val appearance = if (isNight) {
                     0

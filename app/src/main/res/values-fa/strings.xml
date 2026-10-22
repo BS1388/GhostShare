@@ -138,4 +138,7 @@
     <string name="err_import_structure">ساختار فایل با فرمت مورد انتظار مطابقت ندارد</string>
     <string name="err_import_version">نسخه‌ی فایل پشتیبانی نمی‌شود</string>
     <string name="err_import_read">خواندن فایل انجام نشد</string>
+    <string name="title_crash_report">گزارش کرش قبلی</string>
+    <string name="btn_copy">کپی</string>
+    <string name="btn_close">بستن</string>
 </resources>
