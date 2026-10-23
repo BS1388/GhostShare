@@ -27,6 +27,12 @@
 * **Silent & Non-intrusive:** 5-second silent notification with an instant **Undo** button.
 * **Preserves Media States:** Retains crucial parameters like YouTube timestamps (`t=`, `start=`) and playlist indexes.
 * **Material You (Dynamic Colors):** Follows system palette, dark/light themes, and edge-to-edge aesthetics.
+* **Per-app settings:** *Enable per-app* cleans links only for the apps you choose, *Bypass Mode* never touches links copied from the apps you choose.
+* **My Parameters:** the tracking-parameter list is data, not code. See, add and remove parameters (a trailing `*` matches a prefix) or restore the defaults.
+* **Excluded websites:** links from the websites you add (subdomains included) are never changed.
+* **JSON backup:** export and import your parameters and exceptions through the system file picker, with overwrite or merge on import.
+* **Redirect links:** unwraps wrapper links (`l.facebook.com`, `google.com/url`, `youtube.com/redirect`, `out.reddit.com`, ...) to the real destination.
+* **Live changes:** every change is applied immediately, no reboot needed (after the first reboot that loads the updated module).
 
 **🌐 Supported Platforms**
 

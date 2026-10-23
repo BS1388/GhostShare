@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.LruCache
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.Crossfade
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -42,7 +44,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.util.Locale
+import java.util.concurrent.Executors
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 private data class AppEntry(
@@ -52,7 +56,8 @@ private data class AppEntry(
 )
 
 private object IconCache {
-    private val cache = LruCache<String, ImageBitmap>(256)
+    private val cache = LruCache<String, ImageBitmap>(512)
+    val dispatcher = Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 
     fun get(packageName: String): ImageBitmap? = cache.get(packageName)
 
@@ -105,13 +110,16 @@ private suspend fun loadApps(context: Context, chosen: Set<String>): List<AppEnt
 
 @Composable
 private fun AppIcon(packageName: String, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val image by produceState<ImageBitmap?>(initialValue = IconCache.get(packageName), key1 = packageName) {
-        if (value == null) {
-            value = withContext(Dispatchers.IO) { IconCache.load(context, packageName) }
-        }
+    val cached = IconCache.get(packageName)
+    if (cached != null) {
+        Image(bitmap = cached, contentDescription = null, modifier = modifier)
+        return
     }
-    val bitmap = image
+    val context = LocalContext.current
+    val loaded by produceState<ImageBitmap?>(initialValue = null, key1 = packageName) {
+        value = withContext(IconCache.dispatcher) { IconCache.load(context, packageName) }
+    }
+    val bitmap = loaded
     if (bitmap != null) {
         Image(bitmap = bitmap, contentDescription = null, modifier = modifier)
     } else {
@@ -119,6 +127,7 @@ private fun AppIcon(packageName: String, modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppPickerScreen(
     bypass: Boolean,
@@ -127,22 +136,34 @@ fun AppPickerScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val pinned = remember { selected }
     var apps by remember { mutableStateOf<List<AppEntry>?>(null) }
     var query by remember { mutableStateOf("") }
     var showSystem by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        apps = loadApps(context, selected)
+        apps = loadApps(context, pinned)
+    }
+
+    LaunchedEffect(apps) {
+        val list = apps ?: return@LaunchedEffect
+        withContext(IconCache.dispatcher) {
+            for (app in list) {
+                if (IconCache.get(app.packageName) == null) IconCache.load(context, app.packageName)
+            }
+        }
     }
 
     val loaded = apps
     val needle = query.trim().lowercase(Locale.ROOT)
-    val visible = loaded?.filter { app ->
-        val byType = showSystem || !app.hiddenSystem || app.packageName in selected
-        val byQuery = needle.isEmpty() ||
-            app.label.lowercase(Locale.ROOT).contains(needle) ||
-            app.packageName.lowercase(Locale.ROOT).contains(needle)
-        byType && byQuery
+    val visible = remember(loaded, needle, showSystem) {
+        loaded?.filter { app ->
+            val byType = showSystem || !app.hiddenSystem || app.packageName in pinned
+            val byQuery = needle.isEmpty() ||
+                app.label.lowercase(Locale.ROOT).contains(needle) ||
+                app.packageName.lowercase(Locale.ROOT).contains(needle)
+            byType && byQuery
+        }
     }
 
     ScreenScaffold(
@@ -150,76 +171,91 @@ fun AppPickerScreen(
         onBack = onBack
     ) { inner ->
         Box(modifier = Modifier.padding(inner).fillMaxSize()) {
-            if (visible == null) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 24.dp)
-                ) {
-                    item(key = "header") {
-                        Text(
-                            text = stringResource(if (bypass) R.string.desc_pick_bypass else R.string.desc_pick_per_app),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
-                        )
+            Crossfade(targetState = visible == null, label = "apps-loading") { loading ->
+                if (loading || visible == null) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
-                    item(key = "search") {
-                        TextField(
-                            value = query,
-                            onValueChange = { query = it },
-                            placeholder = { Text(stringResource(R.string.hint_search_apps)) },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_search),
-                                    contentDescription = null
-                                )
-                            },
-                            singleLine = true,
-                            shape = RoundedCornerShape(28.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                errorIndicatorColor = Color.Transparent
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                        )
-                    }
-                    item(key = "system") {
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.label_show_system)) },
-                            trailingContent = {
-                                Switch(checked = showSystem, onCheckedChange = { showSystem = it })
-                            },
-                            modifier = Modifier.clickable { showSystem = !showSystem }
-                        )
-                    }
-                    if (visible.isEmpty()) {
-                        item(key = "empty") {
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 24.dp)
+                    ) {
+                        item(key = "header", contentType = "header") {
                             Text(
-                                text = stringResource(R.string.label_no_apps),
+                                text = stringResource(
+                                    if (bypass) R.string.desc_pick_bypass else R.string.desc_pick_per_app
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp)
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
                             )
                         }
-                    }
-                    items(visible, key = { it.packageName }) { app ->
-                        ListItem(
-                            leadingContent = { AppIcon(app.packageName, Modifier.size(40.dp)) },
-                            headlineContent = { Text(app.label, maxLines = 1) },
-                            supportingContent = { Text(app.packageName, maxLines = 1) },
-                            trailingContent = {
-                                Checkbox(checked = app.packageName in selected, onCheckedChange = null)
-                            },
-                            modifier = Modifier.clickable { onToggle(app.packageName) }
-                        )
+                        item(key = "search", contentType = "search") {
+                            TextField(
+                                value = query,
+                                onValueChange = { query = it },
+                                placeholder = { Text(stringResource(R.string.hint_search_apps)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_search),
+                                        contentDescription = null
+                                    )
+                                },
+                                singleLine = true,
+                                shape = RoundedCornerShape(28.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    disabledIndicatorColor = Color.Transparent,
+                                    errorIndicatorColor = Color.Transparent
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                            )
+                        }
+                        item(key = "system", contentType = "system") {
+                            ListItem(
+                                colors = ghostListItemColors(),
+                                headlineContent = { Text(stringResource(R.string.label_show_system)) },
+                                trailingContent = {
+                                    Switch(checked = showSystem, onCheckedChange = { showSystem = it })
+                                },
+                                modifier = Modifier
+                                    .ghostListRow()
+                                    .clickable { showSystem = !showSystem }
+                            )
+                        }
+                        if (visible.isEmpty()) {
+                            item(key = "empty", contentType = "empty") {
+                                Text(
+                                    text = stringResource(R.string.label_no_apps),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(32.dp)
+                                )
+                            }
+                        }
+                        items(visible, key = { it.packageName }, contentType = { "app" }) { app ->
+                            ListItem(
+                                colors = ghostListItemColors(),
+                                leadingContent = { AppIcon(app.packageName, Modifier.size(40.dp)) },
+                                headlineContent = { Text(app.label, maxLines = 1) },
+                                supportingContent = { Text(app.packageName, maxLines = 1) },
+                                trailingContent = {
+                                    Checkbox(checked = app.packageName in selected, onCheckedChange = null)
+                                },
+                                modifier = Modifier
+                                    .animateItemPlacement()
+                                    .ghostListRow()
+                                    .clickable { onToggle(app.packageName) }
+                            )
+                        }
                     }
                 }
             }

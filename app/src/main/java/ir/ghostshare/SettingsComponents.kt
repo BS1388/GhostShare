@@ -1,6 +1,7 @@
 package ir.ghostshare
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ListItemColors
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,6 +45,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+
+@Composable
+fun GhostCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    OutlinedCard(
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        content = content
+    )
+}
+
+@Composable
+fun ghostListItemColors(): ListItemColors =
+    ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+
+fun Modifier.ghostListRow(): Modifier =
+    this
+        .padding(horizontal = 16.dp, vertical = 2.dp)
+        .clip(RoundedCornerShape(20.dp))
 
 @Composable
 fun SectionTitle(text: String) {
@@ -76,7 +103,7 @@ fun SwitchCard(
     onCheckedChange: (Boolean) -> Unit,
     footer: (@Composable ColumnScope.() -> Unit)? = null
 ) {
-    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+    GhostCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -139,7 +166,7 @@ fun ActionCard(
     value: String? = null,
     onClick: () -> Unit
 ) {
-    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+    GhostCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -198,7 +225,11 @@ fun ScreenScaffold(
                         )
                     }
                 },
-                actions = actions
+                actions = actions,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         snackbarHost = snackbarHost,

@@ -22,8 +22,8 @@ object SettingsStore {
             .putString(Constants.PREF_ADDED_PARAMS, GhostConfig.joinList(updated.addedParameters))
             .putString(Constants.PREF_REMOVED_PARAMS, GhostConfig.joinList(updated.removedParameters))
             .putString(Constants.PREF_EXCEPTION_DOMAINS, GhostConfig.joinList(updated.exceptionDomains))
-            .putString(Constants.PREF_EXCEPTION_PARAMS, GhostConfig.joinList(updated.exceptionParameters))
             .remove(Constants.PREF_USER_EXCEPTIONS)
+            .remove("exception_params")
             .apply()
         broadcast(context)
         return updated

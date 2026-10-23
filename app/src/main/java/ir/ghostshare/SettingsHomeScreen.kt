@@ -170,7 +170,7 @@ fun SettingsHomeScreen(
     }
 
     val parameterCount = config.effectiveParameters().size
-    val exceptionCount = config.exceptionDomains.size + config.exceptionParameters.size
+    val exceptionCount = config.exceptionDomains.size
 
     ScreenScaffold(
         title = stringResource(R.string.title_advanced_settings),

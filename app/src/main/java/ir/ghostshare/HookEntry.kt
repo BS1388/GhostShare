@@ -831,7 +831,7 @@ class HookEntry : IXposedHookLoadPackage {
                 XposedBridge.log("[$TAG] Could not mirror config for app processes: ${t.message}")
             }
         }
-        XposedBridge.log("[$TAG] Config applied: perApp=${newConfig.perAppEnabled}(${newConfig.perAppPackages.size}) bypass=${newConfig.bypassEnabled}(${newConfig.bypassPackages.size}) redirect=${newConfig.redirectUnwrap} params=+${newConfig.addedParameters.size}/-${newConfig.removedParameters.size} exceptions=${newConfig.exceptionDomains.size}/${newConfig.exceptionParameters.size}")
+        XposedBridge.log("[$TAG] Config applied: perApp=${newConfig.perAppEnabled}(${newConfig.perAppPackages.size}) bypass=${newConfig.bypassEnabled}(${newConfig.bypassPackages.size}) redirect=${newConfig.redirectUnwrap} params=+${newConfig.addedParameters.size}/-${newConfig.removedParameters.size} exceptions=${newConfig.exceptionDomains.size}")
     }
 
     private fun mirroredConfig(thisObject: Any?): GhostConfig? {

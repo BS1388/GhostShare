@@ -86,8 +86,8 @@
     <string name="title_section_data">Parameters &amp; exceptions</string>
     <string name="title_my_parameters">My Parameters</string>
     <string name="desc_my_parameters">View, add or remove the tracking parameters that get cleaned</string>
-    <string name="title_exceptions">Websites &amp; parameter exceptions</string>
-    <string name="desc_exceptions">Links from these websites and these parameters are never changed</string>
+    <string name="title_exceptions">Excluded websites</string>
+    <string name="desc_exceptions">Links from these websites are never changed</string>
     <string name="title_section_backup">Backup</string>
     <string name="title_export_json">Export JSON file</string>
     <string name="desc_export_json">Save your parameters and exceptions to a file</string>
@@ -120,13 +120,10 @@
     <string name="msg_restore_defaults">Parameters you added or removed will be reset to the default list.</string>
     <string name="label_no_results">No results</string>
     <string name="label_empty_list">Nothing here yet</string>
-    <string name="tab_websites">Websites</string>
-    <string name="tab_parameters">Parameters</string>
     <string name="title_add_domain">Add website</string>
     <string name="hint_domain">example.com</string>
     <string name="msg_invalid_domain">Enter a valid domain</string>
     <string name="desc_exceptions_websites">Cleaning is skipped entirely for links from these websites and their subdomains.</string>
-    <string name="desc_exceptions_parameters">These parameters are never removed from any link. End with * for a prefix.</string>
     <string name="title_import_dialog">Import settings</string>
     <string name="msg_import_dialog">Clear the previous data first?</string>
     <string name="msg_import_dialog_hint">Yes replaces your parameters and exceptions with the file. No adds the new items and keeps what you already have.</string>
@@ -138,7 +135,4 @@
     <string name="err_import_structure">The file does not match the expected structure</string>
     <string name="err_import_version">Unsupported file version</string>
     <string name="err_import_read">Could not read the file</string>
-    <string name="title_crash_report">Previous crash report</string>
-    <string name="btn_copy">Copy</string>
-    <string name="btn_close">Close</string>
 </resources>

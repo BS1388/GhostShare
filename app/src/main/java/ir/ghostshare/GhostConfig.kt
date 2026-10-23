@@ -11,7 +11,6 @@ data class GhostConfig(
     val addedParameters: Set<String> = emptySet(),
     val removedParameters: Set<String> = emptySet(),
     val exceptionDomains: Set<String> = emptySet(),
-    val exceptionParameters: Set<String> = emptySet(),
     val appLayerDisabled: Boolean = false
 ) {
 
@@ -51,7 +50,7 @@ data class GhostConfig(
         UrlCleaner.exceptionDomains = exceptionDomains
         UrlCleaner.matcher = ParameterMatcher.of(effectiveParameters())
         UrlCleaner.protectedMatcher = ParameterMatcher.of(
-            exceptionParameters + removedParameters.filterNot { it.endsWith("*") }
+            removedParameters.filterNot { it.endsWith("*") }
         )
     }
 
@@ -64,8 +63,7 @@ data class GhostConfig(
         "bl=${joinList(bypassPackages)}",
         "ap=${joinList(addedParameters)}",
         "rp=${joinList(removedParameters)}",
-        "ed=${joinList(exceptionDomains)}",
-        "ep=${joinList(exceptionParameters)}"
+        "ed=${joinList(exceptionDomains)}"
     ).joinToString(";")
 
     fun encodeForMirror(): String {
@@ -93,7 +91,6 @@ data class GhostConfig(
             Constants.PREF_ADDED_PARAMS,
             Constants.PREF_REMOVED_PARAMS,
             Constants.PREF_EXCEPTION_DOMAINS,
-            Constants.PREF_EXCEPTION_PARAMS,
             Constants.PREF_USER_EXCEPTIONS
         )
 
@@ -112,11 +109,6 @@ data class GhostConfig(
         fun normalizeParameter(input: String): String? {
             val value = input.trim().lowercase()
             return if (PARAMETER_REGEX.matches(value)) value else null
-        }
-
-        fun looksLikeDomain(input: String): Boolean {
-            val value = input.trim().lowercase()
-            return '.' in value && '_' !in value && '*' !in value && normalizeDomain(value) != null
         }
 
         fun parsePackages(raw: String?): Set<String> = parseList(raw) { PACKAGE_REGEX.matches(it) }
@@ -155,8 +147,7 @@ data class GhostConfig(
                 bypassPackages = parsePackages(map["bl"]),
                 addedParameters = parseParameters(map["ap"]),
                 removedParameters = parseParameters(map["rp"]),
-                exceptionDomains = parseDomains(map["ed"]),
-                exceptionParameters = parseParameters(map["ep"])
+                exceptionDomains = parseDomains(map["ed"])
             )
         }
 
@@ -176,8 +167,7 @@ data class GhostConfig(
                 bypassPackages = parsePackages(prefs.getString(Constants.PREF_BYPASS_PACKAGES, "")),
                 addedParameters = parseParameters(prefs.getString(Constants.PREF_ADDED_PARAMS, "")),
                 removedParameters = parseParameters(prefs.getString(Constants.PREF_REMOVED_PARAMS, "")),
-                exceptionDomains = parseDomains(domains),
-                exceptionParameters = parseParameters(prefs.getString(Constants.PREF_EXCEPTION_PARAMS, ""))
+                exceptionDomains = parseDomains(domains)
             )
         }
 
@@ -198,8 +188,7 @@ data class GhostConfig(
                 bypassPackages = parsePackages(strings[Constants.PREF_BYPASS_PACKAGES]),
                 addedParameters = parseParameters(strings[Constants.PREF_ADDED_PARAMS]),
                 removedParameters = parseParameters(strings[Constants.PREF_REMOVED_PARAMS]),
-                exceptionDomains = parseDomains(domains),
-                exceptionParameters = parseParameters(strings[Constants.PREF_EXCEPTION_PARAMS])
+                exceptionDomains = parseDomains(domains)
             )
         }
     }

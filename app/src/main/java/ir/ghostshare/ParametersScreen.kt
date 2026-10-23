@@ -1,6 +1,6 @@
 package ir.ghostshare
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ParametersScreen(
     config: GhostConfig,
@@ -44,7 +45,9 @@ fun ParametersScreen(
         config.effectiveParameters().sorted()
     }
     val needle = query.trim().lowercase()
-    val visible = if (needle.isEmpty()) entries else entries.filter { it.contains(needle) }
+    val visible = remember(entries, needle) {
+        if (needle.isEmpty()) entries else entries.filter { it.contains(needle) }
+    }
 
     if (showAdd) {
         AddEntryDialog(
@@ -115,7 +118,7 @@ fun ParametersScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 96.dp)
             ) {
-                item(key = "search") {
+                item(key = "search", contentType = "search") {
                     TextField(
                         value = query,
                         onValueChange = { query = it },
@@ -129,6 +132,8 @@ fun ParametersScreen(
                         singleLine = true,
                         shape = RoundedCornerShape(28.dp),
                         colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent,
@@ -140,7 +145,7 @@ fun ParametersScreen(
                     )
                 }
                 if (visible.isEmpty()) {
-                    item(key = "empty") {
+                    item(key = "empty", contentType = "empty") {
                         Text(
                             text = stringResource(R.string.label_no_results),
                             style = MaterialTheme.typography.bodyMedium,
@@ -151,9 +156,10 @@ fun ParametersScreen(
                         )
                     }
                 }
-                items(visible, key = { it }) { name ->
+                items(visible, key = { it }, contentType = { "parameter" }) { name ->
                     val isDefault = name in DefaultParameters.SET
                     ListItem(
+                        colors = ghostListItemColors(),
                         headlineContent = { Text(name, maxLines = 1) },
                         supportingContent = {
                             Text(stringResource(if (isDefault) R.string.label_default else R.string.label_custom))
@@ -165,7 +171,10 @@ fun ParametersScreen(
                                     contentDescription = stringResource(R.string.cd_remove)
                                 )
                             }
-                        }
+                        },
+                        modifier = Modifier
+                            .animateItemPlacement()
+                            .ghostListRow()
                     )
                 }
             }

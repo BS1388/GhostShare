@@ -16,7 +16,6 @@ object Constants {
     const val PREF_ADDED_PARAMS = "added_params"
     const val PREF_REMOVED_PARAMS = "removed_params"
     const val PREF_EXCEPTION_DOMAINS = "exception_domains"
-    const val PREF_EXCEPTION_PARAMS = "exception_params"
     const val EXTRA_CONFIG = "config"
     const val GLOBAL_SETTING_KEY = "ghostshare_config"
 

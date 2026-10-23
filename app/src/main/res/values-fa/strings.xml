@@ -86,8 +86,8 @@
     <string name="title_section_data">پارامترها و استثناها</string>
     <string name="title_my_parameters">پارامترهای من</string>
     <string name="desc_my_parameters">پارامترهای رهگیری پاک‌شونده را ببینید، اضافه یا حذف کنید</string>
-    <string name="title_exceptions">وب‌سایت‌ها و پارامترهای استثنا</string>
-    <string name="desc_exceptions">لینک‌های این وب‌سایت‌ها و این پارامترها هرگز تغییر نمی‌کنند</string>
+    <string name="title_exceptions">سایت‌های استثنا</string>
+    <string name="desc_exceptions">لینک‌های این سایت‌ها هرگز تغییر نمی‌کنند</string>
     <string name="title_section_backup">پشتیبان‌گیری</string>
     <string name="title_export_json">دریافت فایل JSON</string>
     <string name="desc_export_json">ذخیره‌ی پارامترها و استثناها در یک فایل</string>
@@ -120,13 +120,10 @@
     <string name="msg_restore_defaults">پارامترهایی که اضافه یا حذف کرده‌اید به فهرست پیش‌فرض برمی‌گردند.</string>
     <string name="label_no_results">نتیجه‌ای نیست</string>
     <string name="label_empty_list">هنوز چیزی اضافه نشده</string>
-    <string name="tab_websites">وب‌سایت‌ها</string>
-    <string name="tab_parameters">پارامترها</string>
     <string name="title_add_domain">افزودن وب‌سایت</string>
     <string name="hint_domain">example.com</string>
     <string name="msg_invalid_domain">یک دامنه‌ی معتبر وارد کنید</string>
     <string name="desc_exceptions_websites">پاک‌سازی برای لینک‌های این وب‌سایت‌ها و زیردامنه‌هایشان کاملاً انجام نمی‌شود.</string>
-    <string name="desc_exceptions_parameters">این پارامترها از هیچ لینکی حذف نمی‌شوند. برای پیشوند در انتها * بگذارید.</string>
     <string name="title_import_dialog">وارد کردن تنظیمات</string>
     <string name="msg_import_dialog">آیا داده‌های قبلی پاک شوند؟</string>
     <string name="msg_import_dialog_hint">«بله» پارامترها و استثناهای شما را با فایل جایگزین می‌کند. «خیر» موارد جدید را اضافه می‌کند و داده‌های فعلی می‌مانند.</string>
@@ -138,7 +135,4 @@
     <string name="err_import_structure">ساختار فایل با فرمت مورد انتظار مطابقت ندارد</string>
     <string name="err_import_version">نسخه‌ی فایل پشتیبانی نمی‌شود</string>
     <string name="err_import_read">خواندن فایل انجام نشد</string>
-    <string name="title_crash_report">گزارش کرش قبلی</string>
-    <string name="btn_copy">کپی</string>
-    <string name="btn_close">بستن</string>
 </resources>
