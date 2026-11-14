@@ -1,3 +1,5 @@
+{
+  "version": 1,
   "site_rules": [
     {
       "domain": "airbnb.ca",
@@ -1175,5 +1177,4 @@
       "keep": [],
       "strip": [
         "$3p",
-        "$deep_link",
-        "$ori
+        "$deep_li
