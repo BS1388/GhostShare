@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
@@ -15,7 +16,6 @@ import android.os.SystemClock
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
 import android.view.View
-import android.view.Window
 import android.view.WindowInsetsController
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -30,33 +30,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-/**
- * صفحه اصلی تنظیمات، نمایش وضعیت، کنترل مجوز اعلان‌ها، انتخابگر دوزبانه و پیوند گیت‌هاب ماژول GhostShare.
- * بازطراحی شده بر اساس سیستم طراحی Material 3 Design Kit (Google M3) با پشتیبانی کامل از:
- *
- * ۱. سیستم چندزبانه بومی (فارسی و انگلیسی):
- *    - تشخیص هوشمند در اولین اجرا (اگر زبان دستگاه فارسی باشد -> فارسی؛ غیر آن -> اجباراً انگلیسی).
- *    - انتخابگر شیک Material 3 Segmented Toggle با تغییر آنی، نرم و بدون کرش.
- *    - ذخیره پایدار وضعیت زبان در SharedPreferences جهت ماندگاری دائمی.
- *    - تغییر جهت چیدمان خودکار (RTL برای فارسی و LTR برای انگلیسی).
- *
- * ۲. اعتبارسنجی پویا و کنترل هوشمند مجوز اعلان:
- *    - بررسی وضعیت دسترسی با NotificationManagerCompat.areNotificationsEnabled() در تمام نسخه‌ها.
- *    - بررسی مجوز Runtime در اندروید ۱۳ به بعد (API 33+) با POST_NOTIFICATIONS.
- *    - بررسی مسدود نبودن کانال اعلان سایلنت اختصاصی ماژول.
- *    - دیالوگ راهنما و درخواست مجوز رسمی متریال ۳ با MaterialAlertDialogBuilder و گوشه‌های ۲۸dp.
- *    - هدایت مستقیم به صفحه تنظیمات اعلان برنامه در صورت رد دائمی یا مسدود بودن دسترسی.
- *
- * ۳. رنگ‌های پویا (Material You / Monet):
- *    استخراج خودکار پالت رنگی از والپیپر و تم گوشی کاربر در اندروید ۱۲ به بعد
- *    و سوئیچ خودکار بین حالت تیره و روشن همگام با سیستم‌عامل.
- *
- * ۴. تعامل بدون پرش و فیلیکر در نشانگر وضعیت (Status Badge):
- *    - انیمیشن ملایم چرخش نشانگر نوری و میکرواِشکیل کادر بدون تغییر ناگهانی ابعاد و متن.
- *    - بازخورد لمسی (Haptic Feedback) آنی برای تجربه کاربری نرم و حرفه‌ای.
- *    - مکانیزم دِبانس (Debounce Cooldown) ۱.۲ ثانیه‌ای جهت جلوگیری از ارسال اسپم برودکست.
- *    - ایمنی کامل در برابر نشت کانتکست در زمان بستن یا چرخش صفحه.
- */
 open class MainActivity : AppCompatActivity() {
 
     private lateinit var layoutStatusBadge: LinearLayout
@@ -65,18 +38,20 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var switchNotification: Switch
     private lateinit var cardGithub: LinearLayout
 
-    // کامپوننت‌های کنترل زبان Material 3
     private lateinit var btnLangFa: TextView
     private lateinit var btnLangEn: TextView
 
-    // لانچر رسمی درخواست مجوز Runtime در اندروید ۱۳ به بعد
     private lateinit var notificationPermissionLauncher: ActivityResultLauncher<String>
 
-    // پرچم‌های کنترل وضعیت داخلی جهت جلوگیری از لوپ رویدادها و همگام‌سازی بعد از بازگشت از تنظیمات
     private var isUpdatingSwitchInternally = false
+
+    private val restorePrefListener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+        if (key == Constants.PREF_SHOW_RESTORE_NOTIFICATION) {
+            setSwitchCheckedSilently(prefs.getBoolean(key, true))
+        }
+    }
     private var waitingForNotificationSettings = false
 
-    // وضعیت قبلی نشانگر جهت پیشگیری از تغییرات ناگهانی و ریدراهای مکرر
     private var lastStatusState: StatusState? = null
     private var lastCheckTimestamp = 0L
     private var isCheckingInProgress = false
@@ -87,17 +62,10 @@ open class MainActivity : AppCompatActivity() {
         INACTIVE
     }
 
-    /**
-     * تزریق کانتکست چندزبانه با زبان و جهت چیدمان (RTL/LTR) مناسب
-     */
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
     }
 
-    /**
-     * این متد در زمان اجرا توسط هوک اختصاصی در HookEntry به مقدار true تغییر می‌یابد.
-     * به صورت open تعریف شده تا توسط بهینه‌سازهای کامپایلر اینلاین نشود.
-     */
     open fun isModuleActive(): Boolean {
         return false
     }
@@ -105,11 +73,9 @@ open class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // حذف اکشن‌بار سنتی جهت نمایش استاندارد Material 3 Edge-to-Edge
         supportActionBar?.hide()
         actionBar?.hide()
 
-        // ثبت لانچر درخواست مجوز Runtime برای اندروید ۱۳ به بعد
         notificationPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted ->
@@ -120,9 +86,11 @@ open class MainActivity : AppCompatActivity() {
             }
         }
 
+        val appContext = applicationContext
+        Thread { SettingsStore.load(appContext) }.start()
+
         setContentView(R.layout.activity_main)
 
-        // تنظیم هماهنگ نوار وضعیت و کلیدهای ناوبری با سیستم رنگ و تم گوشی
         setupSystemBars()
 
         layoutStatusBadge = findViewById(R.id.layout_status_badge)
@@ -131,11 +99,9 @@ open class MainActivity : AppCompatActivity() {
         switchNotification = findViewById(R.id.switch_restore_notification)
         cardGithub = findViewById(R.id.card_github)
 
-        // اتصال دکمه‌های کنترل زبان Material 3
         btnLangFa = findViewById(R.id.btn_lang_fa)
         btnLangEn = findViewById(R.id.btn_lang_en)
 
-        // به‌روزرسانی ظاهری کنترل زبان بر اساس زبان فعال
         updateLanguageSelectorUI(LocaleHelper.getLanguage(this))
 
         btnLangFa.setOnClickListener {
@@ -146,21 +112,17 @@ open class MainActivity : AppCompatActivity() {
             onLanguageButtonClicked(LocaleHelper.LANG_EN)
         }
 
-        // اطمینان از اعمال برش کادر گرد روی ریپل لمسی در سطح کانتکست
         cardGithub.clipToOutline = true
 
-        // لمس نشانگر وضعیت همراه با بازخورد لمسی، انیمیشن نرم و دِبانس بدون پرش متن
         layoutStatusBadge.setOnClickListener {
             onStatusBadgeClicked()
         }
 
-        // کلیک روی کارت گیت‌هاب برای باز کردن مستقیم مخزن در مرورگر
         cardGithub.setOnClickListener {
             cardGithub.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             openGitHubRepository()
         }
 
-        // بازیابی وضعیت قبلی نشانگر در صورت تغییر زبان یا چرخش صفحه
         savedInstanceState?.getString("saved_status_state")?.let { name ->
             try {
                 lastStatusState = StatusState.valueOf(name)
@@ -168,17 +130,21 @@ open class MainActivity : AppCompatActivity() {
             } catch (_: Throwable) {}
         }
 
-        // ساخت یا به‌روزرسانی کانال اعلان متناسب با زبان فعال
         createNotificationChannelIfNeeded()
 
-        // مقداردهی اولیه وضعیت سوئیچ
         initSwitchState()
 
         findViewById<View>(R.id.card_advanced).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        // درخواست اولیه مجوز اعلان در اندروید ۱۳ به بعد در صورت نیاز
+        findViewById<View>(R.id.card_link_test).setOnClickListener {
+            startActivity(
+                Intent(this, SettingsActivity::class.java)
+                    .putExtra(SettingsActivity.EXTRA_START_SCREEN, SettingsScreen.LINK_TEST.name)
+            )
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isNotificationPermissionGranted()) {
             val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
             val hasPrompted = prefs.getBoolean("has_initial_prompted_notif", false)
@@ -188,7 +154,6 @@ open class MainActivity : AppCompatActivity() {
             }
         }
 
-        // کنترل مجوز و تنظیمات هنگام تغییر وضعیت سوئیچ
         switchNotification.setOnCheckedChangeListener { view, isChecked ->
             if (isUpdatingSwitchInternally) return@setOnCheckedChangeListener
 
@@ -196,7 +161,7 @@ open class MainActivity : AppCompatActivity() {
 
             if (isChecked) {
                 setNotificationEnabled(enabled = true, showToast = true)
-                // در صورت نیاز به مجوز Runtime در اندروید ۱۳ به بعد، دیالوگ راهنما نمایش داده می‌شود
+
                 if (!isNotificationPermissionGranted()) {
                     showNotificationPermissionDialog()
                 }
@@ -211,11 +176,22 @@ open class MainActivity : AppCompatActivity() {
         lastStatusState?.let { outState.putString("saved_status_state", it.name) }
     }
 
+    override fun onStart() {
+        super.onStart()
+        getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+            .registerOnSharedPreferenceChangeListener(restorePrefListener)
+    }
+
+    override fun onStop() {
+        getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+            .unregisterOnSharedPreferenceChangeListener(restorePrefListener)
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
         setupSystemBars()
 
-        // در صورت بازگشت کاربر از صفحه تنظیمات اعلان، بررسی مجدد دسترسی
         if (waitingForNotificationSettings) {
             waitingForNotificationSettings = false
             if (isNotificationPermissionGranted()) {
@@ -227,19 +203,13 @@ open class MainActivity : AppCompatActivity() {
         checkModuleStatus(silent = true)
     }
 
-    /**
-     * همگام‌سازی لحظه‌ای با تغییر حالت Dark/Light تم سیستم‌عامل
-     */
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         setupSystemBars()
-        // بازنشانی وضعیت ظاهری با رنگ‌های جدید حالت شب/روز
+
         lastStatusState?.let { renderStatus(it, animateTransition = false) }
     }
 
-    /**
-     * هماهنگ‌سازی رنگ و کنتراست نوار وضعیت و ناوبری با سیستم Material 3 و Material You
-     */
     private fun setupSystemBars() {
         val isNight = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
@@ -281,12 +251,6 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * مدیریت تغییر زبان از طریق انتخابگر سگمنتد متریال ۳:
-     * - بازخورد لمسی آنی
-     * - ذخیره پایدار در SharedPreferences
-     * - بازنشانی نرم و بدون پرش فرم با ترنزیشن فید ملایم
-     */
     private fun onLanguageButtonClicked(targetLang: String) {
         val currentLang = LocaleHelper.getLanguage(this)
         if (currentLang == targetLang) {
@@ -309,15 +273,11 @@ open class MainActivity : AppCompatActivity() {
         val targetCtx = LocaleHelper.getLocalizedContext(this, targetLang)
         Toast.makeText(this, targetCtx.getString(R.string.msg_lang_changed), Toast.LENGTH_SHORT).show()
 
-        // بازسازی روان رابط کاربری با انیمیشن فید ملایم
         recreate()
         @Suppress("DEPRECATION")
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
-    /**
-     * رنگ‌آمیزی و استایل‌دهی دکمه‌های کنترل زبان متناسب با استانداردهای Material 3
-     */
     private fun updateLanguageSelectorUI(currentLang: String) {
         val isFa = currentLang == LocaleHelper.LANG_FA
 
@@ -336,14 +296,8 @@ open class MainActivity : AppCompatActivity() {
         )
     }
 
-    /**
-     * بررسی جامع دسترسی اعلان:
-     * ۱. بررسی مجوز Runtime در اندروید ۱۳ به بعد (API 33+) با POST_NOTIFICATIONS
-     * ۲. بررسی فعال بودن اعلان برنامه در سطح سیستم با NotificationManagerCompat.areNotificationsEnabled()
-     * ۳. بررسی مسدود نبودن کانال اعلان اختصاصی ماژول در اندروید ۸ به بعد (API 26+)
-     */
     private fun isNotificationPermissionGranted(): Boolean {
-        // ۱. بررسی مجوز Runtime در اندروید ۱۳ به بعد (API 33+)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissionCheck = ContextCompat.checkSelfPermission(
                 this,
@@ -354,13 +308,11 @@ open class MainActivity : AppCompatActivity() {
             }
         }
 
-        // ۲. بررسی وضعیت سراسری فعال بودن اعلان برنامه از طریق NotificationManagerCompat
         val nmCompat = NotificationManagerCompat.from(this)
         if (!nmCompat.areNotificationsEnabled()) {
             return false
         }
 
-        // ۳. بررسی وضعیت کانال اعلان در اندروید ۸ به بعد (API 26+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
             val channel = nm?.getNotificationChannel(NotificationReceiver.CHANNEL_ID)
@@ -372,9 +324,6 @@ open class MainActivity : AppCompatActivity() {
         return true
     }
 
-    /**
-     * ساخت یا به‌روزرسانی کانال اعلان سایلنت متناسب با زبان فعال برنامه
-     */
     private fun createNotificationChannelIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
@@ -392,9 +341,6 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * مقداردهی سوئیچ در راه‌اندازی اولیه صفحه
-     */
     private fun initSwitchState() {
         val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         val isEnabled = prefs.getBoolean(Constants.PREF_SHOW_RESTORE_NOTIFICATION, true)
@@ -402,9 +348,6 @@ open class MainActivity : AppCompatActivity() {
         notifySystemServer(isEnabled)
     }
 
-    /**
-     * همگام‌سازی وضعیت سوئیچ با تنظیمات سیستم هنگام بازگشت به برنامه
-     */
     private fun syncNotificationSwitchState() {
         val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         val isEnabled = prefs.getBoolean(Constants.PREF_SHOW_RESTORE_NOTIFICATION, true)
@@ -412,13 +355,6 @@ open class MainActivity : AppCompatActivity() {
         notifySystemServer(isEnabled)
     }
 
-    /**
-     * نمایش دیالوگ راهنمایی و درخواست مجوز اعلان منطبق بر استانداردهای Material 3 Design Kit:
-     * - گوشه‌های گرد ۲۸dp استاندارد Material 3
-     * - استفاده از تم و پالت رنگی دینامیک (Monet)
-     * - توضیح شفاف و محترمانه دلیل نیاز به اعلان
-     * - دکمه مثبت برای اعطای مجوز یا باز کردن تنظیمات، و دکمه منفی برای انصراف
-     */
     private fun showNotificationPermissionDialog() {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.dialog_notif_permission_title)
@@ -440,11 +376,6 @@ open class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    /**
-     * پردازش درخواست دسترسی به اعلان:
-     * در اندروید ۱۳ به بعد، در صورت امکان از لانچر سیستمی استفاده می‌شود؛
-     * در غیر این صورت یا در نسخه‌های پایین‌تر، کاربر مستقیماً به صفحه تنظیمات اعلان برنامه هدایت می‌شود.
-     */
     private fun requestNotificationAccess() {
         val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         val hasRequestedBefore = prefs.getBoolean("has_requested_notif_permission", false)
@@ -462,9 +393,6 @@ open class MainActivity : AppCompatActivity() {
         openAppNotificationSettings()
     }
 
-    /**
-     * باز کردن مستقیم صفحه تنظیمات اعلان ماژول GhostShare در تنظیمات سیستم‌عامل
-     */
     private fun openAppNotificationSettings() {
         waitingForNotificationSettings = true
         try {
@@ -490,21 +418,15 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * کال‌بک تأیید مجوز از طرف کاربر
-     */
     private fun onNotificationPermissionGranted() {
         if (isNotificationPermissionGranted()) {
             setNotificationEnabled(enabled = true, showToast = true)
         } else {
-            // ممکن است مجوز Runtime تأیید شده باشد اما اعلان در سطح سیستم غیرفعال باشد
+
             openAppNotificationSettings()
         }
     }
 
-    /**
-     * کال‌بک رد مجوز از طرف کاربر
-     */
     private fun onNotificationPermissionDenied() {
         setSwitchCheckedSilently(false)
         saveNotificationPreference(false)
@@ -519,9 +441,6 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * اعمال وضعیت اعلان، ذخیره در SharedPreferences و ارسال برودکست به سیستم‌سرور
-     */
     private fun setNotificationEnabled(enabled: Boolean, showToast: Boolean) {
         setSwitchCheckedSilently(enabled)
         saveNotificationPreference(enabled)
@@ -544,22 +463,15 @@ open class MainActivity : AppCompatActivity() {
         prefs.edit().putBoolean(Constants.PREF_SHOW_RESTORE_NOTIFICATION, enabled).apply()
     }
 
-    /**
-     * پردازش لمس بج وضعیت:
-     * - بازخورد لرزشی (Haptic Feedback)
-     * - جلوگیری از اسپم کلیک (Debounce)
-     * - انیمیشن نرم نور وضعیت بدون هیچ‌گونه پرش سایز یا تغییر ناگهانی متن کادر
-     */
     private fun onStatusBadgeClicked() {
         val now = SystemClock.elapsedRealtime()
         if (now - lastCheckTimestamp < 1200L || isCheckingInProgress) {
-            // جلوگیری از اسپم با مکانیزم Debounce
+
             return
         }
         lastCheckTimestamp = now
         isCheckingInProgress = true
 
-        // بازخورد لمسی آنی
         try {
             layoutStatusBadge.performHapticFeedback(
                 HapticFeedbackConstants.KEYBOARD_TAP,
@@ -569,7 +481,6 @@ open class MainActivity : AppCompatActivity() {
             layoutStatusBadge.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
         }
 
-        // افکت نرم فید و میکرواِشکیل کادر بدون تغییر سایز لی‌اوت
         layoutStatusBadge.animate()
             .scaleX(0.96f)
             .scaleY(0.96f)
@@ -582,7 +493,6 @@ open class MainActivity : AppCompatActivity() {
                     .start()
             }.start()
 
-        // انیمیشن چرخش و پالس ملایم چراغ وضعیت (Status Dot)
         ivStatusDot.animate()
             .rotationBy(360f)
             .alpha(0.3f)
@@ -608,14 +518,9 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * استعلام وضعیت فعال‌سازی ماژول:
-     * ۱. هوک مستقیم isModuleActive()
-     * ۲. پاسخ Ordered Broadcast سیستم‌سرور
-     */
     private fun checkModuleStatus(silent: Boolean) {
         val directHookActive = isModuleActive()
-        val intent = Intent(Constants.ACTION_CHECK_STATUS)
+        val intent = Intent(Constants.ACTION_CHECK_STATUS).setPackage("android")
 
         try {
             sendOrderedBroadcast(
@@ -654,9 +559,6 @@ open class MainActivity : AppCompatActivity() {
         renderStatus(newState, animateTransition)
     }
 
-    /**
-     * اعمال وضعیت بصری با تغییرات پیوسته و جلوگیری از ریدراهای ناگهانی
-     */
     private fun renderStatus(state: StatusState, animateTransition: Boolean) {
         val stateChanged = lastStatusState != state
         lastStatusState = state
@@ -687,7 +589,6 @@ open class MainActivity : AppCompatActivity() {
             }
         }
 
-        // اگر وضعیت تغییری نکرده، بدون بازنویسی ناگهانی فقط رنگ و شکل حفظ شود
         if (!stateChanged && !animateTransition) {
             layoutStatusBadge.setBackgroundResource(bgRes)
             tvStatusBadge.setText(textRes)
@@ -697,7 +598,7 @@ open class MainActivity : AppCompatActivity() {
         }
 
         if (stateChanged && animateTransition) {
-            // تغییر ملایم با فید نرم در صورت تفاوت در وضعیت
+
             layoutStatusBadge.animate()
                 .alpha(0.6f)
                 .setDuration(100L)

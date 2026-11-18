@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Binder
 import android.os.Build
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import android.os.PersistableBundle
 import android.os.SystemClock
@@ -27,18 +28,6 @@ import java.lang.reflect.Member
 import java.lang.reflect.Modifier
 import java.util.Collections
 
-/**
- * نقطه ورود ماژول GhostShare در چارچوب LSPosed / Xposed.
- *
- * تضمین‌های پایداری و امنیت در هسته سیستم (system_server):
- * ۱. پیشگیری قطعی از Memory Leak: پاک‌سازی کامل ThreadLocalها با remove() در انتهای هر فراخوانی بایندر.
- * ۲. صفر بودن احتمال بن‌بست (Deadlock): عدم اجرای Disk I/O یا IPC در بلاک‌های قفل همگام‌سازی شده.
- * ۳. ایزولاسیون کامل استثناها: مهار ۱۰۰٪ خطاها بدون پرتاب به هسته اندروید جهت تضمین صفر بودن احتمال سافت‌ریبوت.
- * ۴. لغو هدفمند تایمر اعلان با Runnable اختصاصی به جای removeCallbacksAndMessages(null) برای حفظ تسک‌های سیستمی.
- * ۵. پاک‌سازی هویت بایندر (Binder.clearCallingIdentity()) قبل از ارسال برودکست اعلان یا ثبت نوتیفیکیشن.
- * ۶. اعلان کاملاً سایلنت و بدون مزاحمت در پنل اعلان‌ها با اهمیت IMPORTANCE_LOW و شناسه ghostshare_silent_restore_v1.
- * ۷. پیشگیری قطعی از لوپ و نمایش مجدد اعلان پس از کلیک روی «بازگرداندن» با گارد چندلایه (Label، Extras، کش زمانی).
- */
 class HookEntry : IXposedHookLoadPackage {
 
     companion object {
@@ -54,18 +43,8 @@ class HookEntry : IXposedHookLoadPackage {
         private var config = GhostConfig()
 
         @Volatile
-        private var appConfig: GhostConfig? = null
-
-        @Volatile
-        private var appConfigTimestamp = 0L
-
-        @Volatile
-        private var appliedAppConfig: GhostConfig? = null
-
-        @Volatile
         private var systemReceiversRegistered = false
 
-        // کش درون‌حافظه‌ای لینک‌های به‌تازگی بازگردانده شده جهت جلوگیری ۱۰۰٪ از لوپ پردازش
         @Volatile
         private var lastRestoredText: String? = null
         @Volatile
@@ -82,10 +61,8 @@ class HookEntry : IXposedHookLoadPackage {
             lastRestoredTimestamp = SystemClock.elapsedRealtime()
         }
 
-        // پرچم محلی ترد جهت جلوگیری از لوپ تودرتو؛ با remove() در بلاک finally پاک‌سازی کامل می‌شود
         private val isProcessing = ThreadLocal<Boolean>()
 
-        // مقداردهی ایمن و تنبل Handler بدون ریسک ExceptionInInitializerError در لود Zygote
         @Volatile
         private var mainHandler: Handler? = null
 
@@ -101,10 +78,14 @@ class HookEntry : IXposedHookLoadPackage {
             return mainHandler
         }
 
-        // مجموعه‌ای ایمن جهت جلوگیری از هوک تکراری متدها
         private val hookedMethods = Collections.synchronizedSet(HashSet<Member>())
 
-        // اسامی کلاس‌های سرویس کلیپ‌بورد در رام‌های استاندارد و کاستوم
+        private val configHandler: Handler by lazy {
+            val thread = HandlerThread("ghostshare-config")
+            thread.start()
+            Handler(thread.looper)
+        }
+
         private val SERVICE_CLASS_NAMES = listOf(
             "com.android.server.clipboard.ClipboardService",
             "com.android.server.ClipboardService",
@@ -115,24 +96,11 @@ class HookEntry : IXposedHookLoadPackage {
     }
 
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
-        // ۱. هوک اپلیکیشن خود ماژول جهت سنجش آنی فعال‌سازی در LSPosed
-        if (lpparam.packageName == "ir.ghostshare" || lpparam.packageName == "io.github.bs1388.ghostshare") {
-            hookGhostShareApp(lpparam)
-            return
-        }
-
-        // ۲. هوک هسته سیستم‌عامل
-        if (lpparam.packageName == "android") {
-            hookSystemServer(lpparam)
-        } else {
-            // ۳. هوک در سطح پروسه برنامه‌ها
-            hookAppProcess(lpparam)
+        when (lpparam.packageName) {
+            Constants.APP_PACKAGE -> hookGhostShareApp(lpparam)
+            "android" -> hookSystemServer(lpparam)
         }
     }
-
-    // =========================================================================
-    // لایه ۰: هوک درون برنامه GhostShare جهت سنجش آنی وضعیت
-    // =========================================================================
 
     private fun hookGhostShareApp(lpparam: LoadPackageParam) {
         try {
@@ -148,34 +116,23 @@ class HookEntry : IXposedHookLoadPackage {
         }
     }
 
-    // =========================================================================
-    // لایه ۱: هوک هسته سیستم‌عامل (system_server)
-    // =========================================================================
-
     private fun hookSystemServer(lpparam: LoadPackageParam) {
         try {
             XposedBridge.log("[$TAG] Initializing in system_server (Android ${Build.VERSION.RELEASE}, SDK ${Build.VERSION.SDK_INT})...")
 
-            // دریافت اولیه کانتکست در صورت در دسترس بودن
             ensureSystemContext(null)
             systemContext?.let { registerSystemReceivers(it) }
 
-            // هوک چرخه حیات راه‌اندازی SystemServer
             hookSystemServerLifecycle(lpparam.classLoader)
 
-            // هوک سرویس کلیپ‌بورد در صورت فعالیت هم‌اکنون
             hookActiveClipboardFromServiceManager(lpparam.classLoader)
 
-            // هوک ServiceManager.addService
             hookServiceManagerAddService(lpparam.classLoader)
 
-            // هوک SystemService.publishBinderService
             hookSystemServicePublish(lpparam.classLoader)
 
-            // اسکن کلاس‌های سرویس در رام‌های AOSP، شیائومی و سامسونگ
             hookKnownServiceClasses(lpparam.classLoader)
 
-            // تلاش‌های زمان‌بندی‌شده ملایم جهت اطمینان از ثبت قطعی در بدو بوت
             scheduleContextRetries(lpparam.classLoader)
         } catch (t: Throwable) {
             XposedBridge.log("[$TAG] Safe isolation: error in hookSystemServer: ${t.message}")
@@ -226,7 +183,7 @@ class HookEntry : IXposedHookLoadPackage {
         for (delay in retries) {
             getMainHandler()?.postDelayed({
                 try {
-                    // در صورتی که کانتکست و رسیورها ثبت شده باشند، کار اضافی انجام نشود
+
                     if (systemContext != null && systemReceiversRegistered) {
                         return@postDelayed
                     }
@@ -356,12 +313,11 @@ class HookEntry : IXposedHookLoadPackage {
                 })
             } catch (_: Throwable) {}
 
-            // مجاز کردن دسترسی پس‌زمینه کلیپ‌بورد برای GhostShare روی تمامی نسخه‌ها و رام‌ها
             try {
                 XposedBridge.hookAllMethods(serviceClass, "clipboardAccessAllowed", object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         try {
-                            val isGhostShare = param.args.any { it is String && (it == "ir.ghostshare" || it == "io.github.bs1388.ghostshare") }
+                            val isGhostShare = param.args.any { it is String && it == Constants.APP_PACKAGE }
                             if (isGhostShare) {
                                 param.result = true
                             }
@@ -418,7 +374,7 @@ class HookEntry : IXposedHookLoadPackage {
             } catch (t: Throwable) {
                 XposedBridge.log("[$TAG] Error inside system setPrimaryClip hook: ${t.message}")
             } finally {
-                // جلوگیری قطعی از Memory Leak در استخر تردهای بایندر سیستم‌سرور
+
                 isProcessing.remove()
             }
         }
@@ -434,13 +390,11 @@ class HookEntry : IXposedHookLoadPackage {
             ?: (param.args.firstOrNull { it is String } as? String)
             ?: ""
 
-        // بررسی پرچم‌ها و نشانه‌های بازگردانی لینک توسط کاربر
         val description = originalClip.description
         val extras = description?.extras
         val clipLabel = description?.label?.toString()
 
-        if (callingPackage == "ir.ghostshare" ||
-            callingPackage == "io.github.bs1388.ghostshare" ||
+        if (callingPackage == Constants.APP_PACKAGE ||
             clipLabel == Constants.LABEL_RESTORED_LINK ||
             extras?.getBoolean(Constants.EXTRA_BYPASS_CLEAN, false) == true) {
             XposedBridge.log("[$TAG] Restored clip detected. Preserving without cleaning or notifications.")
@@ -480,122 +434,23 @@ class HookEntry : IXposedHookLoadPackage {
         }
     }
 
-    // =========================================================================
-    // لایه ۲: هوک در سطح پروسه برنامه‌ها (App Process Level)
-    // =========================================================================
-
-    private fun hookAppProcess(lpparam: LoadPackageParam) {
-        try {
-            val cmClass = XposedHelpers.findClassIfExists("android.content.ClipboardManager", lpparam.classLoader)
-                ?: XposedHelpers.findClassIfExists("android.content.ClipboardManager", null)
-            if (cmClass != null) {
-                XposedBridge.hookAllMethods(cmClass, "setPrimaryClip", object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        handleAppSetPrimaryClip(param, lpparam.packageName)
-                    }
-                })
-
-                XposedBridge.hookAllMethods(cmClass, "setText", object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        handleAppSetText(param, lpparam.packageName)
-                    }
-                })
-            }
-        } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Error hooking ClipboardManager in ${lpparam.packageName}: ${t.message}")
-        }
-    }
-
-    private fun handleAppSetPrimaryClip(param: XC_MethodHook.MethodHookParam, packageName: String) {
-        if (packageName == "ir.ghostshare" || packageName == "io.github.bs1388.ghostshare") return
-        if (isProcessing.get() == true) return
-        try {
-            isProcessing.set(true)
-            val clipIndex = param.args.indexOfFirst { it is ClipData }
-            if (clipIndex == -1) return
-
-            val originalClip = param.args[clipIndex] as? ClipData ?: return
-            val description = originalClip.description
-            val extras = description?.extras
-            val clipLabel = description?.label?.toString()
-
-            if (clipLabel == Constants.LABEL_RESTORED_LINK ||
-                extras?.getBoolean(Constants.EXTRA_BYPASS_CLEAN, false) == true) return
-
-            val firstText = originalClip.getItemAt(0)?.text?.toString()
-            if (isRecentlyRestored(firstText)) return
-
-            if (!appLayerAllowed(param.thisObject, packageName)) return
-
-            val cleanResult = cleanClipData(originalClip) ?: return
-            param.args[clipIndex] = cleanResult.newClip
-
-            XposedBridge.log("[$TAG] Cleaned clipboard in-app for: $packageName")
-            for ((before, after) in cleanResult.cleanedUrls) {
-                XposedBridge.log("[$TAG]   [Raw]   $before")
-                XposedBridge.log("[$TAG]   [Clean] $after")
-            }
-
-            cleanResult.firstOriginalText?.let { originalText ->
-                dispatchRestoreNotification(param.thisObject, originalText, packageName)
-            }
-        } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Error in app setPrimaryClip: ${t.message}")
-        } finally {
-            isProcessing.remove()
-        }
-    }
-
-    private fun handleAppSetText(param: XC_MethodHook.MethodHookParam, packageName: String) {
-        if (packageName == "ir.ghostshare" || packageName == "io.github.bs1388.ghostshare") return
-        if (isProcessing.get() == true) return
-        try {
-            isProcessing.set(true)
-            val text = param.args.getOrNull(0) as? CharSequence ?: return
-            val textStr = text.toString()
-            if (isRecentlyRestored(textStr)) return
-            if (!appLayerAllowed(param.thisObject, packageName)) return
-
-            val report = UrlCleaner.cleanWithReport(textStr) ?: return
-            param.args[0] = report.cleanedText
-            XposedBridge.log("[$TAG] Cleaned clipboard setText in-app for: $packageName")
-
-            dispatchRestoreNotification(param.thisObject, textStr, packageName)
-        } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Error in app setText: ${t.message}")
-        } finally {
-            isProcessing.remove()
-        }
-    }
-
-    /**
-     * ارسال تضمینی اعلان بازیابی:
-     * - با پاک‌سازی هویت بایندر (Binder.clearCallingIdentity()) تا محدودیت‌های UID کلاینت برطرف شود.
-     * - با اینتنت صریح (Explicit Intent) همراه با پرچم‌های فورگراند و IncludeStoppedPackages جهت بیدارباش گیرنده.
-     * - ارسال منحصراً به کامپوننت NotificationReceiver برنامه GhostShare تا فقط و فقط یک اعلان با کانتکست
-     *   و زبان انتخابی برنامه نمایش یابد و هیچ اعلانی از سمت Android System ارسال نشود.
-     */
     private fun dispatchRestoreNotification(thisObject: Any?, originalText: String, callingPackage: String) {
         val token = Binder.clearCallingIdentity()
         try {
             ensureSystemContext(thisObject)
             val ctx = systemContext ?: getContextFromObject(thisObject) ?: return
 
-            val targetPackages = listOf("io.github.bs1388.ghostshare", "ir.ghostshare")
-            for (pkg in targetPackages) {
-                try {
-                    val explicitIntent = Intent(Constants.ACTION_SHOW_NOTIFICATION).apply {
-                        setClassName(pkg, "ir.ghostshare.NotificationReceiver")
-                        addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                        addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                        putExtra(Constants.EXTRA_ORIGINAL_LINK, originalText)
-                        putExtra(Constants.EXTRA_CALLING_PACKAGE, callingPackage)
-                    }
-                    ctx.sendBroadcast(explicitIntent)
-                    XposedBridge.log("[$TAG] Dispatched restore notification broadcast exclusively to $pkg")
-                } catch (t: Throwable) {
-                    XposedBridge.log("[$TAG] Failed to send broadcast to $pkg: ${t.message}")
+            try {
+                val explicitIntent = Intent(Constants.ACTION_SHOW_NOTIFICATION).apply {
+                    setClassName(Constants.APP_PACKAGE, "ir.ghostshare.NotificationReceiver")
+                    addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                    addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                    putExtra(Constants.EXTRA_ORIGINAL_LINK, originalText)
+                    putExtra(Constants.EXTRA_CALLING_PACKAGE, callingPackage)
                 }
+                ctx.sendBroadcast(explicitIntent)
+            } catch (t: Throwable) {
+                XposedBridge.log("[$TAG] Failed to send restore notification: ${t.message}")
             }
         } catch (t: Throwable) {
             XposedBridge.log("[$TAG] Error dispatching restore notification: ${t.message}")
@@ -628,10 +483,6 @@ class HookEntry : IXposedHookLoadPackage {
         return null
     }
 
-    // =========================================================================
-    // منطق مشترک پاک‌سازی و اعلان
-    // =========================================================================
-
     private class CleanResult(
         val newClip: ClipData,
         val cleanedUrls: List<Pair<String, String>>,
@@ -651,7 +502,6 @@ class HookEntry : IXposedHookLoadPackage {
             val item = clip.getItemAt(i) ?: continue
             var itemModified = false
 
-            // ۱. پاک‌سازی متن ساده
             val currentText = item.text?.toString()
             val cleanedText = if (!currentText.isNullOrEmpty()) {
                 val report = UrlCleaner.cleanWithReport(currentText)
@@ -669,7 +519,6 @@ class HookEntry : IXposedHookLoadPackage {
                 null
             }
 
-            // ۲. پاک‌سازی متن HTML
             val currentHtml = item.htmlText
             val cleanedHtml = if (!currentHtml.isNullOrEmpty()) {
                 val report = UrlCleaner.cleanWithReport(currentHtml)
@@ -687,7 +536,6 @@ class HookEntry : IXposedHookLoadPackage {
                 null
             }
 
-            // ۳. پاک‌سازی URI وب
             val currentUri = item.uri
             val cleanedUri = if (currentUri != null &&
                 (currentUri.scheme.equals("http", ignoreCase = true) || currentUri.scheme.equals("https", ignoreCase = true))) {
@@ -727,10 +575,6 @@ class HookEntry : IXposedHookLoadPackage {
         return CleanResult(newClip, cleanedUrlsList, firstOriginalText)
     }
 
-    /**
-     * ثبت رسیورهای سیستمی در پروسه system_server:
-     * کاملاً ایزوله، بدون قفل‌های سنگین و بدون بلاک کردن تردهای سیستمی
-     */
     private fun registerSystemReceivers(ctx: Context) {
         if (systemReceiversRegistered) return
         synchronized(this) {
@@ -755,7 +599,7 @@ class HookEntry : IXposedHookLoadPackage {
                                     )
                                     showRestoreNotification = enabled
                                     XposedBridge.log("[$TAG] Settings updated live: showRestoreNotification = $enabled")
-                                    GhostConfig.decode(intent.getStringExtra(Constants.EXTRA_CONFIG))?.let { applyConfig(it, ctx) }
+                                    GhostConfig.decode(intent.getStringExtra(Constants.EXTRA_CONFIG))?.let { applyConfig(it) }
                                 }
                                 Constants.ACTION_CHECK_STATUS -> {
                                     resultCode = Activity.RESULT_OK
@@ -766,7 +610,6 @@ class HookEntry : IXposedHookLoadPackage {
                                     if (!original.isNullOrEmpty()) {
                                         recordRestoredText(original)
 
-                                        // بازگردانی مستقیم و قطعی به کلیپ‌بورد در هسته سیستم‌عامل
                                         try {
                                             val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                                             val clipData = ClipData.newPlainText(Constants.LABEL_RESTORED_LINK, original)
@@ -780,18 +623,15 @@ class HookEntry : IXposedHookLoadPackage {
                                             XposedBridge.log("[$TAG] Failed to restore clip in system_server: ${t.message}")
                                         }
 
-                                        // ارسال برودکست به برنامه جهت نمایش Toast تاییدیه (فقط در صورتی که برودکست از خود برنامه نیامده باشد)
                                         if (!intent.getBooleanExtra("from_app", false)) {
-                                            for (pkg in listOf("io.github.bs1388.ghostshare", "ir.ghostshare")) {
-                                                try {
-                                                    val toastIntent = Intent(Constants.ACTION_RESTORE_CLIPBOARD).apply {
-                                                        setClassName(pkg, "ir.ghostshare.NotificationReceiver")
-                                                        putExtra(Constants.EXTRA_ORIGINAL_LINK, original)
-                                                        putExtra("from_system", true)
-                                                    }
-                                                    ctx.sendBroadcast(toastIntent)
-                                                } catch (_: Throwable) {}
-                                            }
+                                            try {
+                                                val toastIntent = Intent(Constants.ACTION_RESTORE_CLIPBOARD).apply {
+                                                    setClassName(Constants.APP_PACKAGE, "ir.ghostshare.NotificationReceiver")
+                                                    putExtra(Constants.EXTRA_ORIGINAL_LINK, original)
+                                                    putExtra("from_system", true)
+                                                }
+                                                ctx.sendBroadcast(toastIntent)
+                                            } catch (_: Throwable) {}
                                         }
                                     }
                                 }
@@ -802,18 +642,25 @@ class HookEntry : IXposedHookLoadPackage {
                     }
                 }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    ctx.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
-                } else {
-                    ctx.registerReceiver(receiver, filter)
+                val exportedFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_EXPORTED else 0
+                ctx.registerReceiver(receiver, filter, Constants.CONTROL_PERMISSION, configHandler, exportedFlag)
+
+                val unlockReceiver = object : BroadcastReceiver() {
+                    override fun onReceive(context: Context?, intent: Intent?) {
+                        reloadFromApp(ctx)
+                    }
                 }
+                val privateFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
+                ctx.registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_UNLOCKED), null, configHandler, privateFlag)
+
                 systemReceiversRegistered = true
                 XposedBridge.log("[$TAG] System receivers successfully registered in system_server")
 
-                // بارگذاری تنظیمات بدون نگه داشتن قفل روی ترد جاری
-                getMainHandler()?.post {
-                    showRestoreNotification = loadSettingsFromApp(ctx)
-                    applyConfig(loadConfigFromApp(ctx) ?: config, ctx)
+                configHandler.post {
+                    try {
+                        Settings.Global.putString(ctx.contentResolver, Constants.GLOBAL_SETTING_KEY, null)
+                    } catch (_: Throwable) {}
+                    reloadFromApp(ctx)
                 }
             } catch (t: Throwable) {
                 XposedBridge.log("[$TAG] Warning: could not register system receivers: ${t.message}")
@@ -821,45 +668,23 @@ class HookEntry : IXposedHookLoadPackage {
         }
     }
 
-    private fun applyConfig(newConfig: GhostConfig, ctx: Context?) {
+    private fun applyConfig(newConfig: GhostConfig) {
         config = newConfig
         newConfig.applyToCleaner()
-        if (ctx != null) {
-            try {
-                Settings.Global.putString(ctx.contentResolver, Constants.GLOBAL_SETTING_KEY, newConfig.encodeForMirror())
-            } catch (t: Throwable) {
-                XposedBridge.log("[$TAG] Could not mirror config for app processes: ${t.message}")
-            }
-        }
         XposedBridge.log("[$TAG] Config applied: perApp=${newConfig.perAppEnabled}(${newConfig.perAppPackages.size}) bypass=${newConfig.bypassEnabled}(${newConfig.bypassPackages.size}) redirect=${newConfig.redirectUnwrap} params=+${newConfig.addedParameters.size}/-${newConfig.removedParameters.size} exceptions=${newConfig.exceptionDomains.size}")
     }
 
-    private fun mirroredConfig(thisObject: Any?): GhostConfig? {
-        val now = SystemClock.elapsedRealtime()
-        if (now - appConfigTimestamp < 3000L) return appConfig
-        val ctx = getContextFromObject(thisObject) ?: return appConfig
-        val raw = try {
-            Settings.Global.getString(ctx.contentResolver, Constants.GLOBAL_SETTING_KEY)
-        } catch (_: Throwable) {
-            null
+    private fun reloadFromApp(ctx: Context) {
+        try {
+            showRestoreNotification = loadSettingsFromApp(ctx)
+            applyConfig(loadConfigFromApp(ctx) ?: config)
+        } catch (t: Throwable) {
+            XposedBridge.log("[$TAG] Failed to reload config: ${t.message}")
         }
-        appConfig = GhostConfig.decode(raw)
-        appConfigTimestamp = now
-        return appConfig
-    }
-
-    private fun appLayerAllowed(thisObject: Any?, packageName: String): Boolean {
-        val cfg = mirroredConfig(thisObject) ?: return true
-        if (cfg.appLayerDisabled) return false
-        if (cfg !== appliedAppConfig) {
-            cfg.applyToCleaner()
-            appliedAppConfig = cfg
-        }
-        return cfg.shouldClean(packageName)
     }
 
     private fun loadConfigFromApp(ctx: Context): GhostConfig? {
-        for (pkg in listOf("io.github.bs1388.ghostshare", "ir.ghostshare")) {
+        for (pkg in listOf(Constants.APP_PACKAGE)) {
             try {
                 val appCtx = ctx.createPackageContext(pkg, Context.CONTEXT_IGNORE_SECURITY)
                 val sp = appCtx.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
@@ -884,7 +709,7 @@ class HookEntry : IXposedHookLoadPackage {
     }
 
     private fun loadSettingsFromApp(ctx: Context): Boolean {
-        for (pkg in listOf("io.github.bs1388.ghostshare", "ir.ghostshare")) {
+        for (pkg in listOf(Constants.APP_PACKAGE)) {
             try {
                 val appCtx = ctx.createPackageContext(pkg, Context.CONTEXT_IGNORE_SECURITY)
                 val sp = appCtx.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)

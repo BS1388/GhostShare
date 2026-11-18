@@ -169,7 +169,7 @@ fun SettingsHomeScreen(
         )
     }
 
-    val parameterCount = config.effectiveParameters().size
+    val parameterCount = remember(config.addedParameters, config.removedParameters) { config.effectiveParameters().size }
     val exceptionCount = config.exceptionDomains.size
 
     ScreenScaffold(
@@ -223,6 +223,14 @@ fun SettingsHomeScreen(
                 checked = config.redirectUnwrap,
                 onCheckedChange = { on -> update { it.copy(redirectUnwrap = on) } }
             )
+            Spacer(Modifier.height(12.dp))
+            ActionCard(
+                icon = R.drawable.ic_link,
+                title = stringResource(R.string.title_redirect_rules),
+                description = stringResource(R.string.desc_redirect_rules),
+                value = config.redirectRules.size.toString(),
+                onClick = { onNavigate(SettingsScreen.REDIRECT_RULES) }
+            )
 
             SectionTitle(stringResource(R.string.title_section_data))
             ActionCard(
@@ -239,6 +247,14 @@ fun SettingsHomeScreen(
                 description = stringResource(R.string.desc_exceptions),
                 value = exceptionCount.toString(),
                 onClick = { onNavigate(SettingsScreen.EXCEPTIONS) }
+            )
+            Spacer(Modifier.height(12.dp))
+            ActionCard(
+                icon = R.drawable.ic_shield_check,
+                title = stringResource(R.string.title_site_rules),
+                description = stringResource(R.string.desc_site_rules),
+                value = config.siteRules.size.toString(),
+                onClick = { onNavigate(SettingsScreen.SITE_RULES) }
             )
 
             SectionTitle(stringResource(R.string.title_section_backup))

@@ -16,9 +16,6 @@
         android:paddingEnd="20dp"
         android:paddingBottom="24dp">
 
-        <!-- ================================================================= -->
-        <!-- بخش هدر بر اساس Material 3 Top App Bar & Hero                     -->
-        <!-- ================================================================= -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -26,7 +23,6 @@
             android:orientation="vertical"
             android:layout_marginBottom="28dp">
 
-            <!-- آیکون برنامه در کانتینر ترنزیشنال Material 3 -->
             <FrameLayout
                 android:layout_width="72dp"
                 android:layout_height="72dp"
@@ -40,7 +36,6 @@
                     android:contentDescription="@string/app_name" />
             </FrameLayout>
 
-            <!-- عنوان بزرگ Material 3 Headline Medium -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -51,7 +46,6 @@
                 android:textStyle="bold"
                 android:letterSpacing="0.01" />
 
-            <!-- زیرعنوان Material 3 Body Medium -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -60,7 +54,6 @@
                 android:textColor="@color/m3_sys_color_on_surface_variant"
                 android:textSize="13.5sp" />
 
-            <!-- نشانگر وضعیت اتصال ماژول (Material 3 Tonal Status Badge) -->
             <LinearLayout
                 android:id="@+id/layout_status_badge"
                 android:layout_width="wrap_content"
@@ -94,9 +87,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- ================================================================= -->
-        <!-- دسته‌بندی ۱: تنظیمات اصلی (Material 3 Switch Card & Language)      -->
-        <!-- ================================================================= -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -107,7 +97,6 @@
             android:textSize="13sp"
             android:textStyle="bold" />
 
-        <!-- کارت ۱: سوئیچ اعلان بازگردانی -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -117,7 +106,6 @@
             android:gravity="center_vertical"
             android:layout_marginBottom="12dp">
 
-            <!-- آیکون اعلان در نشانگر مربعی گوشه‌گرد Material 3 -->
             <FrameLayout
                 android:layout_width="42dp"
                 android:layout_height="42dp"
@@ -157,7 +145,6 @@
                     android:lineSpacingExtra="2dp" />
             </LinearLayout>
 
-            <!-- سوئیچ اختصاصی سازگار با طراحی Material 3 -->
             <Switch
                 android:id="@+id/switch_restore_notification"
                 android:layout_width="wrap_content"
@@ -166,7 +153,6 @@
                 android:thumb="@drawable/m3_switch_thumb" />
         </LinearLayout>
 
-        <!-- کارت ۲: انتخابگر دوطرفه زبان (Material 3 Segmented Toggle Card) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -182,7 +168,6 @@
                 android:gravity="center_vertical"
                 android:layout_marginBottom="12dp">
 
-                <!-- آیکون زبان در نشانگر مربعی گوشه‌گرد Material 3 -->
                 <FrameLayout
                     android:layout_width="42dp"
                     android:layout_height="42dp"
@@ -221,7 +206,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- کنترل انتخابگر دوطرفه Material 3 Segmented Button Container -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
@@ -229,7 +213,6 @@
                 android:orientation="horizontal"
                 android:padding="3dp">
 
-                <!-- دکمه فارسی -->
                 <TextView
                     android:id="@+id/btn_lang_fa"
                     android:layout_width="0dp"
@@ -245,7 +228,6 @@
                     android:focusable="true"
                     android:layout_marginEnd="2dp" />
 
-                <!-- دکمه انگلیسی -->
                 <TextView
                     android:id="@+id/btn_lang_en"
                     android:layout_width="0dp"
@@ -261,6 +243,68 @@
                     android:focusable="true"
                     android:layout_marginStart="2dp" />
             </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/card_link_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_m3_card"
+            android:clickable="true"
+            android:clipToOutline="true"
+            android:focusable="true"
+            android:foreground="@drawable/bg_m3_ripple_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginEnd="14dp"
+                android:background="@drawable/bg_m3_icon_box_primary">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/title_link_test"
+                    android:src="@drawable/ic_search" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_link_test"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/m3_sys_color_on_surface"
+                    android:textSize="15.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:lineSpacingExtra="2dp"
+                    android:text="@string/desc_link_test"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/m3_sys_color_on_surface_variant"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_chevron_right" />
         </LinearLayout>
 
         <LinearLayout
@@ -325,9 +369,6 @@
                 android:src="@drawable/ic_chevron_right" />
         </LinearLayout>
 
-        <!-- ================================================================= -->
-        <!-- دسته‌بندی ۲: نحوه کارکرد ماژول (Material 3 Info Card)               -->
-        <!-- ================================================================= -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -385,9 +426,6 @@
                 android:lineSpacingExtra="4dp" />
         </LinearLayout>
 
-        <!-- ================================================================= -->
-        <!-- دسته‌بندی ۴: مخزن رسمی گیت‌هاب (Material 3 Interactive Card)      -->
-        <!-- ================================================================= -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -410,7 +448,6 @@
             android:padding="16dp"
             android:gravity="center_vertical">
 
-            <!-- نشان Material 3 برای گیت‌هاب -->
             <FrameLayout
                 android:layout_width="44dp"
                 android:layout_height="44dp"
@@ -448,7 +485,6 @@
                     android:textColor="@color/m3_sys_color_on_surface_variant"
                     android:textSize="12sp" />
 
-                <!-- تگ کوچک مخزن گیت‌هاب -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

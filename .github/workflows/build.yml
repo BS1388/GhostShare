@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
     steps:
       - name: Checkout Code
@@ -36,18 +38,27 @@ jobs:
           echo "=== app/build.gradle.kts ==="; head -25 app/build.gradle.kts || echo "NO app/build.gradle.kts"
           echo "=== gradle projects ==="; gradle projects --stacktrace --warning-mode all || true
 
+      - name: Decode signing keystore
+        if: env.KEYSTORE_BASE64 != ''
+        run: echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+
       - name: Build with Gradle
+        env:
+          KEYSTORE_PATH: ${{ runner.temp }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           if [ -f "./gradlew" ]; then
             chmod +x gradlew
-            ./gradlew assembleDebug --stacktrace --warning-mode all
+            ./gradlew assembleRelease --stacktrace --warning-mode all
           else
-            gradle assembleDebug --stacktrace --warning-mode all
+            gradle assembleRelease --stacktrace --warning-mode all
           fi
 
-      - name: Upload Debug APK
+      - name: Upload Release APK
         uses: actions/upload-artifact@v6
         with:
-          name: GhostShare-Debug
-          path: app/build/outputs/apk/debug/*.apk
+          name: GhostShare-Release
+          path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error

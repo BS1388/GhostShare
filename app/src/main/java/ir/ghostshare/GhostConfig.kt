@@ -1,6 +1,8 @@
 package ir.ghostshare
 
 import android.content.SharedPreferences
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 data class GhostConfig(
     val redirectUnwrap: Boolean = true,
@@ -11,7 +13,8 @@ data class GhostConfig(
     val addedParameters: Set<String> = emptySet(),
     val removedParameters: Set<String> = emptySet(),
     val exceptionDomains: Set<String> = emptySet(),
-    val appLayerDisabled: Boolean = false
+    val siteRules: Map<String, SiteRule> = DefaultSiteRules.ALL,
+    val redirectRules: Set<String> = DefaultRedirectRules.SET
 ) {
 
     fun effectiveParameters(): Set<String> {
@@ -32,22 +35,29 @@ data class GhostConfig(
         if (name in DefaultParameters.SET) {
             copy(removedParameters = removedParameters - name)
         } else {
-            copy(addedParameters = addedParameters + name)
+            copy(addedParameters = addedParameters + name, removedParameters = removedParameters - name)
         }
 
     fun removeParameter(name: String): GhostConfig =
-        if (name in DefaultParameters.SET) {
-            copy(removedParameters = removedParameters + name, addedParameters = addedParameters - name)
-        } else {
-            copy(addedParameters = addedParameters - name)
-        }
+        copy(removedParameters = removedParameters + name, addedParameters = addedParameters - name)
 
     fun restoreDefaultParameters(): GhostConfig =
         copy(addedParameters = emptySet(), removedParameters = emptySet())
 
+    fun restoreDefaultExceptions(): GhostConfig =
+        copy(exceptionDomains = emptySet())
+
+    fun restoreDefaultSiteRules(): GhostConfig =
+        copy(siteRules = DefaultSiteRules.ALL)
+
+    fun restoreDefaultRedirectRules(): GhostConfig =
+        copy(redirectRules = DefaultRedirectRules.SET)
+
     fun applyToCleaner() {
         UrlCleaner.redirectUnwrapEnabled = redirectUnwrap
+        UrlCleaner.setRedirectRules(redirectRules)
         UrlCleaner.exceptionDomains = exceptionDomains
+        UrlCleaner.siteRules = CompiledSiteRules.of(siteRules)
         UrlCleaner.matcher = ParameterMatcher.of(effectiveParameters())
         UrlCleaner.protectedMatcher = ParameterMatcher.of(
             removedParameters.filterNot { it.endsWith("*") }
@@ -63,20 +73,16 @@ data class GhostConfig(
         "bl=${joinList(bypassPackages)}",
         "ap=${joinList(addedParameters)}",
         "rp=${joinList(removedParameters)}",
-        "ed=${joinList(exceptionDomains)}"
+        "ed=${joinList(exceptionDomains)}",
+        "sr=${joinSiteRules(siteRules)}",
+        "rr=${joinRedirectRules(redirectRules)}"
     ).joinToString(";")
 
-    fun encodeForMirror(): String {
-        val full = encode()
-        return if (full.length <= MIRROR_LIMIT) full else "v=2;big=1"
-    }
-
     companion object {
-        const val MIRROR_LIMIT = 8000
         private const val MAX_ITEMS = 5000
 
         private val PACKAGE_REGEX = Regex("[A-Za-z0-9._]{1,255}")
-        private val PARAMETER_REGEX = Regex("""[a-z0-9_.\-\[\]*$]{1,100}""")
+        private val PARAMETER_REGEX = Regex("""[a-z0-9_.\-\[\]*$?]{1,100}""")
         private val STRICT_DOMAIN_REGEX =
             Regex("[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z]{2,24}")
         private val BOOLEAN_XML = Regex("""<boolean name="([^"]+)" value="(true|false)"\s*/>""")
@@ -91,12 +97,59 @@ data class GhostConfig(
             Constants.PREF_ADDED_PARAMS,
             Constants.PREF_REMOVED_PARAMS,
             Constants.PREF_EXCEPTION_DOMAINS,
-            Constants.PREF_USER_EXCEPTIONS
+            Constants.PREF_USER_EXCEPTIONS,
+            Constants.PREF_SITE_RULES,
+            Constants.PREF_REDIRECT_RULES
         )
 
         private fun flag(value: Boolean) = if (value) "1" else "0"
 
         fun joinList(items: Set<String>): String = items.sorted().joinToString(",")
+
+        fun joinRedirectRules(rules: Set<String>): String =
+            rules.joinToString(",") { URLEncoder.encode(it, "UTF-8") }
+
+        fun parseRedirectRules(raw: String?): Set<String> {
+            if (raw.isNullOrEmpty()) return emptySet()
+            val result = LinkedHashSet<String>()
+            for (part in raw.split(',')) {
+                if (part.isEmpty()) continue
+                val rule = try {
+                    val decoded = URLDecoder.decode(part, "UTF-8")
+                    if (decoded in DefaultRedirectRules.SET) decoded else RedirectRules.normalize(decoded)
+                } catch (_: Exception) {
+                    null
+                }
+                if (rule != null) result.add(rule)
+                if (result.size >= RedirectRules.MAX_RULES) break
+            }
+            return result
+        }
+
+        fun joinSiteRules(rules: Map<String, SiteRule>): String =
+            rules.entries.sortedBy { it.key }.joinToString(",") { (domain, rule) ->
+                "$domain|${rule.keep.sorted().joinToString("+")}|${rule.strip.sorted().joinToString("+")}"
+            }
+
+        fun parseSiteRules(raw: String?): Map<String, SiteRule> {
+            if (raw.isNullOrBlank()) return emptyMap()
+            val result = LinkedHashMap<String, SiteRule>()
+            var total = 0
+            for (entry in raw.lowercase().split(',')) {
+                val parts = entry.split('|')
+                if (parts.size != 3) continue
+                val domain = parts[0].trim()
+                if (!STRICT_DOMAIN_REGEX.matches(domain)) continue
+                val keep = parts[1].split('+').map { it.trim() }.filter { it.isNotEmpty() && PARAMETER_REGEX.matches(it) }.toSet()
+                val strip = parts[2].split('+').map { it.trim() }.filter { it.isNotEmpty() && PARAMETER_REGEX.matches(it) }.toSet()
+                val rule = SiteRule(keep, strip)
+                if (rule.isEmpty) continue
+                total += keep.size + strip.size
+                if (total > MAX_ITEMS) break
+                result[domain] = rule
+            }
+            return result
+        }
 
         fun normalizeDomain(input: String): String? {
             var value = input.trim().lowercase()
@@ -138,7 +191,6 @@ data class GhostConfig(
                 if (index > 0) map[part.substring(0, index)] = part.substring(index + 1)
             }
             if (map["v"] != "2") return null
-            if (map["big"] == "1") return GhostConfig(appLayerDisabled = true)
             return GhostConfig(
                 redirectUnwrap = map["r"] != "0",
                 perAppEnabled = map["pa"] == "1",
@@ -147,7 +199,9 @@ data class GhostConfig(
                 bypassPackages = parsePackages(map["bl"]),
                 addedParameters = parseParameters(map["ap"]),
                 removedParameters = parseParameters(map["rp"]),
-                exceptionDomains = parseDomains(map["ed"])
+                exceptionDomains = parseDomains(map["ed"]),
+                siteRules = parseSiteRules(map["sr"]),
+                redirectRules = if (map.containsKey("rr")) parseRedirectRules(map["rr"]) else DefaultRedirectRules.SET
             )
         }
 
@@ -167,7 +221,17 @@ data class GhostConfig(
                 bypassPackages = parsePackages(prefs.getString(Constants.PREF_BYPASS_PACKAGES, "")),
                 addedParameters = parseParameters(prefs.getString(Constants.PREF_ADDED_PARAMS, "")),
                 removedParameters = parseParameters(prefs.getString(Constants.PREF_REMOVED_PARAMS, "")),
-                exceptionDomains = parseDomains(domains)
+                exceptionDomains = parseDomains(domains),
+                siteRules = if (prefs.contains(Constants.PREF_SITE_RULES)) {
+                    parseSiteRules(prefs.getString(Constants.PREF_SITE_RULES, ""))
+                } else {
+                    DefaultSiteRules.ALL
+                },
+                redirectRules = if (prefs.contains(Constants.PREF_REDIRECT_RULES)) {
+                    parseRedirectRules(prefs.getString(Constants.PREF_REDIRECT_RULES, ""))
+                } else {
+                    DefaultRedirectRules.SET
+                }
             )
         }
 
@@ -188,7 +252,17 @@ data class GhostConfig(
                 bypassPackages = parsePackages(strings[Constants.PREF_BYPASS_PACKAGES]),
                 addedParameters = parseParameters(strings[Constants.PREF_ADDED_PARAMS]),
                 removedParameters = parseParameters(strings[Constants.PREF_REMOVED_PARAMS]),
-                exceptionDomains = parseDomains(domains)
+                exceptionDomains = parseDomains(domains),
+                siteRules = if (Constants.PREF_SITE_RULES in strings) {
+                    parseSiteRules(strings[Constants.PREF_SITE_RULES])
+                } else {
+                    DefaultSiteRules.ALL
+                },
+                redirectRules = if (Constants.PREF_REDIRECT_RULES in strings) {
+                    parseRedirectRules(strings[Constants.PREF_REDIRECT_RULES])
+                } else {
+                    DefaultRedirectRules.SET
+                }
             )
         }
     }

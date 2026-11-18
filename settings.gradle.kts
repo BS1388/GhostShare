@@ -10,8 +10,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Xposed/LSPosed API artifacts
-        maven(url = "https://api.xposed.info/")
+
+        maven(url = "https://api.xposed.info/") {
+            content {
+                includeGroup("de.robv.android.xposed")
+            }
+        }
     }
 }
 

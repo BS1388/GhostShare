@@ -4,7 +4,6 @@
     <string name="app_subtitle">پاک‌سازی هوشمند پارامترهای رهگیری از کلیپ‌بورد</string>
     <string name="module_description">حذف خودکار پارامترهای رهگیری (utm_*, igsh, si, fbclid, gclid و...) از لینک‌های کپی‌شده در سراسر سیستم‌عامل.</string>
 
-    <!-- عناوین دسته‌بندی‌های Material 3 -->
     <string name="title_section_status">وضعیت اتصال</string>
     <string name="title_section_settings">تنظیمات اصلی</string>
     <string name="title_section_language">زبان برنامه</string>
@@ -17,13 +16,11 @@
     <string name="title_section_how_it_works">نحوه کارکرد ماژول</string>
     <string name="title_section_community">سورس‌کد و مشارکت</string>
 
-    <!-- وضعیت ماژول در چارچوب سیستم -->
     <string name="status_active">چارچوب سیستم (LSPosed) : فعال</string>
     <string name="status_inactive">چارچوب سیستم (LSPosed) : غیرفعال</string>
     <string name="status_needs_reboot">ماژول فعال است (جهت تزریق سراسری ری‌استارت کنید)</string>
     <string name="status_checking">در حال بررسی وضعیت...</string>
 
-    <!-- بخش اعلان و دسترسی -->
     <string name="title_show_notification">اعلان بازگردانی سریع</string>
     <string name="desc_show_notification">نمایش اعلان ۵ ثانیه‌ای دارای دکمه «بازگرداندن» مستقیم بدون باز شدن هیچ برنامه‌ای</string>
     <string name="action_restore">بازگرداندن</string>
@@ -37,17 +34,14 @@
     <string name="msg_notif_enabled">اعلان بازگردانی فعال شد</string>
     <string name="msg_notif_disabled">اعلان بازگردانی غیرفعال شد (پاک‌سازی بدون اعلان)</string>
 
-    <!-- اعلان‌های سیستمی -->
     <string name="notif_channel_name">GhostShare - اعلان بازیابی لینک</string>
     <string name="notif_channel_desc">اعلان سایلنت بازیابی لینک پاک‌سازی شده در پنل اعلان‌ها</string>
     <string name="notif_title">لینک پاک‌سازی شد (GhostShare)</string>
     <string name="notif_text_with_package">پارامترهای رهگیری حذف شدند (%1$s).</string>
     <string name="notif_text_generic">پارامترهای رهگیری از کلیپ‌بورد حذف شدند.</string>
 
-    <!-- کارت نحوه کارکرد -->
     <string name="title_how_it_works">عملکرد سراسری در پس‌زمینه</string>
     <string name="desc_how_it_works">ماژول GhostShare با تزریق به هسته سیستم‌عامل (system_server) و کلیپ‌بورد، کلیه لینک‌های کپی شده را به صورت آنی پایش کرده و پارامترهای رهگیری تبلیغاتی و تحلیلی را بدون تغییر در محتوای اصلی حذف می‌نماید.</string>
-
 
     <string name="tracker_youtube">یوتیوب و یوتیوب موزیک</string>
     <string name="tracker_spotify">اسپوتیفای</string>
@@ -59,12 +53,10 @@
     <string name="tracker_tiktok">تیک‌تاک</string>
     <string name="tracker_google">گوگل، فیسبوک و تبلیغات</string>
 
-    <!-- کارت گیت‌هاب بر اساس Material 3 Design Kit -->
     <string name="title_github">سورس‌کد در گیت‌هاب</string>
     <string name="desc_github">مشاهده مخزن، ستاره دادن و مشارکت در توسعه GhostShare</string>
     <string name="github_repo_tag">BS1388 / GhostShare</string>
 
-    <!-- اسکوپ ماژول در LSPosed -->
     <string-array name="xposed_scope">
         <item>android</item>
         <item>io.github.bs1388.ghostshare</item>
@@ -118,6 +110,8 @@
     <string name="msg_already_exists">قبلاً در فهرست هست</string>
     <string name="title_restore_defaults">بازگردانی پیش‌فرض‌ها؟</string>
     <string name="msg_restore_defaults">پارامترهایی که اضافه یا حذف کرده‌اید به فهرست پیش‌فرض برمی‌گردند.</string>
+    <string name="msg_restore_exceptions">همه‌ی وب‌سایت‌هایی که اضافه کرده‌اید از فهرست استثناها حذف می‌شوند و فهرست به حالت پیش‌فرض (خالی) برمی‌گردد.</string>
+    <string name="msg_restore_site_rules">قانون‌هایی که ساخته‌اید حذف می‌شوند و فقط قانون پیش‌فرض برمی‌گردد: حذف همه‌ی پارامترهای اینستاگرام (به‌جز img_index).</string>
     <string name="label_no_results">نتیجه‌ای نیست</string>
     <string name="label_empty_list">هنوز چیزی اضافه نشده</string>
     <string name="title_add_domain">افزودن وب‌سایت</string>
@@ -135,4 +129,87 @@
     <string name="err_import_structure">ساختار فایل با فرمت مورد انتظار مطابقت ندارد</string>
     <string name="err_import_version">نسخه‌ی فایل پشتیبانی نمی‌شود</string>
     <string name="err_import_read">خواندن فایل انجام نشد</string>
+    <string name="title_update_params">به‌روزرسانی پارامترها</string>
+    <string name="title_update_exceptions">به‌روزرسانی سایت‌های استثنا</string>
+    <string name="cd_update">به‌روزرسانی</string>
+    <string name="desc_update_params">روی یک منبع بزنید تا جدیدترین پارامترهایش دریافت شود. موارد جدید به فهرست شما اضافه می‌شوند و پارامترهایی که حذف کرده‌اید حذف‌شده می‌مانند.</string>
+    <string name="desc_update_exceptions">روی یک منبع بزنید تا جدیدترین وب‌سایت‌هایش دریافت و به فهرست شما اضافه شود.</string>
+    <string name="label_never_updated">هنوز به‌روزرسانی نشده</string>
+    <string name="label_last_updated">آخرین به‌روزرسانی: %1$s</string>
+    <string name="btn_add_source">افزودن منبع</string>
+    <string name="title_add_source">افزودن منبع دلخواه</string>
+    <string name="hint_source_name">نام (اختیاری)</string>
+    <string name="hint_source_url">لینک فایل لیست</string>
+    <string name="note_source_url_params">لینک مستقیم https یا لینک فایل گیت‌هاب. هر پارامتر در یک خط، یا لیست AdGuard / ClearURLs.</string>
+    <string name="note_source_url_exceptions">لینک مستقیم https یا لینک فایل گیت‌هاب. هر وب‌سایت در یک خط.</string>
+    <string name="title_update_site_rules">به‌روزرسانی قانون‌های سایت</string>
+    <string name="desc_update_site_rules">روی یک منبع بزنید تا جدیدترین قانون‌های سایت دریافت شود. موارد جدید به قانون‌های شما اضافه می‌شوند و قانون‌هایی که حذف کرده‌اید ممکن است دوباره برگردند.</string>
+    <string name="note_source_url_site_rules">لینک مستقیم https یا لینک فایل گیت‌هاب به یک فایل JSON از قانون‌های سایت.</string>
+    <string name="msg_invalid_source_url">یک لینک https معتبر وارد کنید</string>
+    <string name="title_remove_source">حذف منبع؟</string>
+    <string name="msg_remove_source">%1$s از فهرست حذف می‌شود. موارد اضافه‌شده‌ی قبلی‌اش می‌مانند.</string>
+    <string name="cd_move_up">انتقال به بالا</string>
+    <string name="cd_move_down">انتقال به پایین</string>
+    <string name="msg_update_added">%1$s: %2$d مورد جدید اضافه شد</string>
+    <string name="msg_update_none">%1$s: چیز جدیدی نبود</string>
+    <string name="msg_update_empty">%1$s: لیست خالی است</string>
+    <string name="err_update_network">اتصال به سرور برقرار نشد</string>
+    <string name="err_update_http">سرور خطای %1$d برگرداند</string>
+    <string name="err_update_large">حجم فایل خیلی زیاد است</string>
+    <string name="err_update_format">قالب لیست شناخته نشد</string>
+    <string name="title_site_rules">قانون‌های سایت</string>
+    <string name="desc_site_rules">نگه داشتن یا حذف پارامترهای مشخص فقط روی یک وب‌سایت</string>
+    <string name="desc_site_rules_screen">قانون‌ها برای وب‌سایت و زیردامنه‌هایش اعمال می‌شوند. قانون «نگه‌دار» همیشه بر بقیه‌ی قانون‌ها برتری دارد.</string>
+    <string name="btn_add_site_rule">افزودن قانون</string>
+    <string name="title_add_site_rule">افزودن قانون سایت</string>
+    <string name="title_edit_site_rule">ویرایش قانون سایت</string>
+    <string name="label_rule_keep">همیشه نگه‌دار (با کاما جدا کنید)</string>
+    <string name="label_rule_strip">اضافه‌تر حذف کن (با کاما جدا کنید)</string>
+    <string name="note_rule_params">برای تطبیق پیشوند در انتها * بگذارید؛ مثلاً utm_*. فقط * یعنی حذف همه‌ی پارامترهای این سایت.</string>
+    <string name="msg_rule_empty">حداقل یکی از دو فهرست را پر کنید</string>
+    <string name="fmt_rule_keep">نگه‌دار: %1$s</string>
+    <string name="fmt_rule_strip">حذف: %1$s</string>
+    <string name="label_all_parameters">همه‌ی پارامترها</string>
+    <string name="cd_help">راهنما</string>
+    <string name="btn_got_it">متوجه شدم</string>
+    <string name="title_site_rules_help">راهنمای قانون‌های سایت</string>
+    <string name="help_rules_what_title">قانون سایت چیست؟</string>
+    <string name="help_rules_what_body">پارامتر بخشی از لینک است که بعد از ? می‌آید؛ مثلاً در site.com/page?id=5 همین id=5 یک پارامتر است. با قانون سایت مشخص می‌کنید روی یک وب‌سایت خاص کدام پارامترها بمانند و کدام حذف شوند.\nقانون روی زیردامنه‌ها هم اعمال می‌شود؛ مثلاً قانون instagram.com روی www.instagram.com هم کار می‌کند.</string>
+    <string name="help_rules_fields_title">فیلدها</string>
+    <string name="help_rules_fields_body">• دامنه: فقط نام سایت، مثل instagram.com. اگر کل لینک را بنویسید، نام سایت از آن جدا می‌شود.\n• همیشه نگه‌دار: پارامترهایی که هرگز نباید حذف شوند.\n• اضافه‌تر حذف کن: پارامترهایی که فقط روی این سایت باید حذف شوند.\n• نام‌ها را با کاما جدا کنید. حداقل یکی از دو فهرست باید پر باشد.</string>
+    <string name="help_rules_star_title">علامت ستاره (*) یعنی چه؟</string>
+    <string name="help_rules_star_body">ستاره یعنی «هر متنی». سه حالت دارد:\n\n۱. ستاره در انتهای یک نام: یعنی هر پارامتری که با آن متن شروع شود.\nمثال: اگر utm_* بنویسید، همه‌ی این‌ها حذف می‌شوند: utm_source، utm_medium، utm_campaign\n\n۲. ستاره تنها در «اضافه‌تر حذف کن»: یعنی همه‌ی پارامترهای این سایت.\nمثال: site.com/post?a=1&amp;b=2 تبدیل می‌شود به site.com/post\n\n۳. ستاره تنها در «همیشه نگه‌دار»: یعنی روی این سایت هیچ پارامتری حذف نشود.\n\nترکیب پرکاربرد: در «اضافه‌تر حذف کن» ستاره بگذارید و در «همیشه نگه‌دار» فقط پارامترهای لازم را بنویسید. همه‌ی پارامترها حذف می‌شوند، به‌جز آن‌هایی که نوشته‌اید.\nمثال: نگه‌دار id و حذف * ، پس site.com/post?id=5&amp;x=1 تبدیل می‌شود به site.com/post?id=5\n\nتوجه: ستاره فقط در انتهای نام کار می‌کند؛ utm_* درست است ولی *_source یا a*b کار نمی‌کند. در صفحه‌ی «پارامترهای من» هم ستاره تنها پذیرفته نمی‌شود.</string>
+    <string name="help_rules_priority_title">اولویت‌ها</string>
+    <string name="help_rules_priority_body">۱. «همیشه نگه‌دار» از همه قوی‌تر است.\n۲. بعد از آن «اضافه‌تر حذف کن» همین سایت.\n۳. در آخر فهرست پارامترهای کلی برنامه.\nاگر سایت در «سایت‌های استثنا» باشد، هیچ قانونی روی آن اجرا نمی‌شود.</string>
+    <string name="help_rules_example_title">مثال: اینستاگرام</string>
+    <string name="help_rules_example_body">دامنه: instagram.com\nهمیشه نگه‌دار: img_index\nاضافه‌تر حذف کن: *\n\nنتیجه: همه‌ی پارامترهای تصادفی مثل igsh و srtk حذف می‌شوند، اما شماره‌ی اسلاید پست (img_index) می‌ماند.</string>
+    <string name="help_rules_test_title">چطور مطمئن شوم؟</string>
+    <string name="help_rules_test_body">از صفحه‌ی «تست لینک» استفاده کنید: لینک را بچسبانید تا ببینید دقیقاً چه چیزی حذف می‌شود.</string>
+    <string name="btn_save">ذخیره</string>
+    <string name="title_link_test">تست لینک</string>
+    <string name="desc_link_test">لینک را بچسبانید و ببینید دقیقاً چه چیزی حذف می‌شود</string>
+    <string name="hint_link_test">لینک را اینجا بچسبانید</string>
+    <string name="msg_test_hint">نتیجه بر اساس تنظیمات فعلی شماست: پارامترها، استثناها، قانون‌های سایت و ریدایرکت.</string>
+    <string name="label_result">نتیجه</string>
+    <string name="label_removed">حذف‌شده</string>
+    <string name="msg_test_no_link">لینکی در این متن پیدا نشد</string>
+    <string name="msg_test_excluded">این وب‌سایت در فهرست استثناهاست و لینک بدون تغییر می‌ماند</string>
+    <string name="msg_test_nothing">چیزی برای حذف نیست: این لینک پارامتر رهگیری ندارد</string>
+    <string name="label_redirect_replaced">لینک ریدایرکت با آدرس واقعی مقصد جایگزین شد</string>
+    <string name="label_url_fragment">بخش fragment آدرس (بعد از #)</string>
+    <string name="cd_paste">چسباندن</string>
+    <string name="cd_clear">پاک کردن</string>
+    <string name="tile_state_on">روشن</string>
+    <string name="tile_state_off">خاموش</string>
+    <string name="title_redirect_rules">قوانین ریدایرکت</string>
+    <string name="desc_redirect_rules">الگوهای پیدا کردن مقصد واقعی از داخل لینک‌های واسطه</string>
+    <string name="desc_redirect_rules_screen">هر قانون یک عبارت منظم (regex) است که مقصد واقعی را از داخل لینک واسطه پیدا می‌کند. باید با ^http شروع شود و دور آدرس مقصد یک گروه (capture group) داشته باشد.</string>
+    <string name="title_add_redirect_rule">افزودن قانون</string>
+    <string name="hint_redirect_rule">عبارت منظم (regex)</string>
+    <string name="note_redirect_rule">مثال: ^https?://l\.example\.com/\?u=([^&amp;]+)</string>
+    <string name="msg_invalid_redirect_rule">قانون باید با ^http شروع شود، یک regex معتبر باشد و یک گروه (capture group) داشته باشد.</string>
+    <string name="msg_restore_redirect_rules">همه‌ی قانون‌هایی که اضافه کرده‌اید حذف می‌شوند و فهرست به قانون‌های پیش‌فرض برمی‌گردد.</string>
+    <string name="title_update_redirects">به‌روزرسانی قوانین ریدایرکت</string>
+    <string name="desc_update_redirects">روی یک منبع بزنید تا آخرین قوانینش دریافت و به فهرست شما اضافه شود.</string>
+    <string name="note_source_url_redirects">لینک مستقیم https یا لینک فایل گیت‌هاب. هر خط یک قانون، یا فایل data.min.json پروژه‌ی ClearURLs.</string>
 </resources>

@@ -4,7 +4,6 @@
     <string name="app_subtitle">Smart clipboard tracking parameter stripper</string>
     <string name="module_description">Automatically strips tracking parameters (utm_*, igsh, si, fbclid, gclid, etc.) from copied links across the entire OS.</string>
 
-    <!-- Material 3 Section Titles -->
     <string name="title_section_status">Connection Status</string>
     <string name="title_section_settings">Main Settings</string>
     <string name="title_section_language">App Language</string>
@@ -17,13 +16,11 @@
     <string name="title_section_how_it_works">How It Works</string>
     <string name="title_section_community">Source Code &amp; Community</string>
 
-    <!-- System Framework Module Status -->
     <string name="status_active">System Framework (LSPosed): Active</string>
     <string name="status_inactive">System Framework (LSPosed): Inactive</string>
     <string name="status_needs_reboot">Module active (Reboot to inject globally)</string>
     <string name="status_checking">Checking status...</string>
 
-    <!-- Notification & Permissions -->
     <string name="title_show_notification">Quick Restore Notification</string>
     <string name="desc_show_notification">Shows a 5-second notification with a direct \'Restore\' button in the background</string>
     <string name="action_restore">Restore</string>
@@ -37,17 +34,14 @@
     <string name="msg_notif_enabled">Restore notification enabled</string>
     <string name="msg_notif_disabled">Restore notification disabled (Silent cleaning)</string>
 
-    <!-- System Notifications -->
     <string name="notif_channel_name">GhostShare - Link Restore Notification</string>
     <string name="notif_channel_desc">Silent notification for restoring cleaned links</string>
     <string name="notif_title">Link Cleaned (GhostShare)</string>
     <string name="notif_text_with_package">Tracking parameters removed (%1$s).</string>
     <string name="notif_text_generic">Tracking parameters removed from clipboard.</string>
 
-    <!-- How It Works Card -->
     <string name="title_how_it_works">Global Background Operation</string>
     <string name="desc_how_it_works">GhostShare hooks into the Android OS core (system_server) and ClipboardManager to intercept copied links instantly, stripping advertising and analytic tracking parameters without breaking original content.</string>
-
 
     <string name="tracker_youtube">YouTube &amp; YouTube Music</string>
     <string name="tracker_spotify">Spotify</string>
@@ -59,12 +53,10 @@
     <string name="tracker_tiktok">TikTok</string>
     <string name="tracker_google">Google, Facebook &amp; Ads</string>
 
-    <!-- GitHub Card (Material 3 Design Kit) -->
     <string name="title_github">Source Code on GitHub</string>
     <string name="desc_github">View repository, star, and contribute to GhostShare</string>
     <string name="github_repo_tag">BS1388 / GhostShare</string>
 
-    <!-- Module Scope in LSPosed -->
     <string-array name="xposed_scope">
         <item>android</item>
         <item>io.github.bs1388.ghostshare</item>
@@ -118,6 +110,8 @@
     <string name="msg_already_exists">Already in the list</string>
     <string name="title_restore_defaults">Restore defaults?</string>
     <string name="msg_restore_defaults">Parameters you added or removed will be reset to the default list.</string>
+    <string name="msg_restore_exceptions">All websites you added will be removed and the exceptions list will go back to its default (empty) state.</string>
+    <string name="msg_restore_site_rules">Rules you created will be deleted and only the default rule comes back: remove all Instagram parameters (except img_index).</string>
     <string name="label_no_results">No results</string>
     <string name="label_empty_list">Nothing here yet</string>
     <string name="title_add_domain">Add website</string>
@@ -135,4 +129,87 @@
     <string name="err_import_structure">The file does not match the expected structure</string>
     <string name="err_import_version">Unsupported file version</string>
     <string name="err_import_read">Could not read the file</string>
+    <string name="title_update_params">Update parameters</string>
+    <string name="title_update_exceptions">Update excluded websites</string>
+    <string name="cd_update">Update</string>
+    <string name="desc_update_params">Tap a source to fetch its latest parameters. New ones are added to your list; parameters you removed stay removed.</string>
+    <string name="desc_update_exceptions">Tap a source to fetch its latest websites and add them to your list.</string>
+    <string name="label_never_updated">Never updated</string>
+    <string name="label_last_updated">Last updated: %1$s</string>
+    <string name="btn_add_source">Add source</string>
+    <string name="title_add_source">Add custom source</string>
+    <string name="hint_source_name">Name (optional)</string>
+    <string name="hint_source_url">Link to the list</string>
+    <string name="note_source_url_params">A direct https link or a GitHub file link. One parameter per line, or an AdGuard / ClearURLs list.</string>
+    <string name="note_source_url_exceptions">A direct https link or a GitHub file link. One website per line.</string>
+    <string name="title_update_site_rules">Update site rules</string>
+    <string name="desc_update_site_rules">Tap a source to fetch its latest site rules. New ones are added to your rules; rules you deleted may come back.</string>
+    <string name="note_source_url_site_rules">A direct https link or a GitHub file link to a JSON file of site rules.</string>
+    <string name="msg_invalid_source_url">Enter a valid https link</string>
+    <string name="title_remove_source">Remove source?</string>
+    <string name="msg_remove_source">%1$s will be removed from the list. Entries it already added stay.</string>
+    <string name="cd_move_up">Move up</string>
+    <string name="cd_move_down">Move down</string>
+    <string name="msg_update_added">%1$s: %2$d new added</string>
+    <string name="msg_update_none">%1$s: already up to date</string>
+    <string name="msg_update_empty">%1$s: the list is empty</string>
+    <string name="err_update_network">Couldn\'t reach the server</string>
+    <string name="err_update_http">Server responded with error %1$d</string>
+    <string name="err_update_large">The file is too large</string>
+    <string name="err_update_format">Unrecognized list format</string>
+    <string name="title_site_rules">Site rules</string>
+    <string name="desc_site_rules">Keep or remove specific parameters on one website</string>
+    <string name="desc_site_rules_screen">Rules apply to the website and its subdomains. A keep rule always wins over everything else.</string>
+    <string name="btn_add_site_rule">Add rule</string>
+    <string name="title_add_site_rule">Add site rule</string>
+    <string name="title_edit_site_rule">Edit site rule</string>
+    <string name="label_rule_keep">Always keep (comma separated)</string>
+    <string name="label_rule_strip">Also remove (comma separated)</string>
+    <string name="note_rule_params">Use * at the end to match a prefix, e.g. utm_*. A lone * removes every parameter on this site.</string>
+    <string name="msg_rule_empty">Fill in at least one of the two lists</string>
+    <string name="fmt_rule_keep">Keep: %1$s</string>
+    <string name="fmt_rule_strip">Remove: %1$s</string>
+    <string name="label_all_parameters">all parameters</string>
+    <string name="cd_help">Help</string>
+    <string name="btn_got_it">Got it</string>
+    <string name="title_site_rules_help">Site rules guide</string>
+    <string name="help_rules_what_title">What is a site rule?</string>
+    <string name="help_rules_what_body">A parameter is the part of a link after the ?, for example id=5 in site.com/page?id=5. A site rule lets you choose which parameters stay and which are removed on one specific website.\nRules also apply to subdomains, so a rule for instagram.com works on www.instagram.com too.</string>
+    <string name="help_rules_fields_title">Fields</string>
+    <string name="help_rules_fields_body">• Domain: just the site name, like instagram.com. If you enter a full link, the site name is extracted from it.\n• Always keep: parameters that must never be removed.\n• Also remove: parameters to remove only on this site.\n• Separate names with commas. At least one of the two lists must be filled in.</string>
+    <string name="help_rules_star_title">What does the star (*) mean?</string>
+    <string name="help_rules_star_body">The star means “anything”. It has three uses:\n\n1. A star at the end of a name: any parameter that starts with that text.\nExample: utm_* removes all of these: utm_source, utm_medium, utm_campaign\n\n2. A lone star in “Also remove”: every parameter on this site.\nExample: site.com/post?a=1&amp;b=2 becomes site.com/post\n\n3. A lone star in “Always keep”: no parameter is removed on this site.\n\nHandy combination: put a star in “Also remove” and write only the parameters you need in “Always keep”. Everything is removed except what you listed.\nExample: keep id and remove *, so site.com/post?id=5&amp;x=1 becomes site.com/post?id=5\n\nNote: the star only works at the end of a name. utm_* is valid, but *_source or a*b does not work. A lone star is also not accepted on the My parameters screen.</string>
+    <string name="help_rules_priority_title">Priority</string>
+    <string name="help_rules_priority_body">1. “Always keep” is the strongest.\n2. Then “Also remove” for the same site.\n3. Finally the app’s general parameter list.\nIf the site is in “Exception sites”, no rule is applied to it.</string>
+    <string name="help_rules_example_title">Example: Instagram</string>
+    <string name="help_rules_example_body">Domain: instagram.com\nAlways keep: img_index\nAlso remove: *\n\nResult: all random parameters such as igsh and srtk are removed, but the post slide number (img_index) stays.</string>
+    <string name="help_rules_test_title">How can I be sure?</string>
+    <string name="help_rules_test_body">Use the “Link test” screen: paste a link to see exactly what gets removed.</string>
+    <string name="btn_save">Save</string>
+    <string name="title_link_test">Test a link</string>
+    <string name="desc_link_test">Paste a link to see exactly what gets removed</string>
+    <string name="hint_link_test">Paste a link here</string>
+    <string name="msg_test_hint">The result uses your current settings: parameters, exceptions, site rules and redirects.</string>
+    <string name="label_result">Result</string>
+    <string name="label_removed">Removed</string>
+    <string name="msg_test_no_link">No link found in this text</string>
+    <string name="msg_test_excluded">This website is in the excluded list, so the link stays as it is</string>
+    <string name="msg_test_nothing">Nothing to remove: this link has no tracking parameters</string>
+    <string name="label_redirect_replaced">Redirect link replaced with the real destination</string>
+    <string name="label_url_fragment">URL fragment (#...)</string>
+    <string name="cd_paste">Paste</string>
+    <string name="cd_clear">Clear</string>
+    <string name="tile_state_on">On</string>
+    <string name="tile_state_off">Off</string>
+    <string name="title_redirect_rules">Redirect rules</string>
+    <string name="desc_redirect_rules">Patterns used to find the real destination inside wrapper links</string>
+    <string name="desc_redirect_rules_screen">Each rule is a regular expression that finds the real destination inside a wrapper link. It must start with ^http and contain one capture group around the destination.</string>
+    <string name="title_add_redirect_rule">Add rule</string>
+    <string name="hint_redirect_rule">Regular expression</string>
+    <string name="note_redirect_rule">Example: ^https?://l\.example\.com/\?u=([^&amp;]+)</string>
+    <string name="msg_invalid_redirect_rule">The rule must start with ^http, be a valid regular expression and contain one capture group.</string>
+    <string name="msg_restore_redirect_rules">All rules you added will be removed and the list will go back to its default rules.</string>
+    <string name="title_update_redirects">Update redirect rules</string>
+    <string name="desc_update_redirects">Tap a source to fetch its latest rules and add them to your list.</string>
+    <string name="note_source_url_redirects">A direct https link or a GitHub file link. One rule per line, or a ClearURLs data.min.json file.</string>
 </resources>

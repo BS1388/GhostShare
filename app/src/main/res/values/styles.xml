@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- تم اصلی ماژول GhostShare بر اساس Material 3 Design Kit (Light Theme) -->
     <style name="Theme.GhostShare" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
@@ -14,16 +13,14 @@
         <item name="android:statusBarColor">@color/m3_sys_color_background</item>
         <item name="android:navigationBarColor">@color/m3_sys_color_background</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowAnimationStyle">@style/Animation.GhostShare.Activity</item>
     </style>
 
-    <!-- تم مخصوص RestoreActivity: کاملاً شفاف و بدون انیمیشن یا پرش پنجره -->
-    <style name="Theme.Invisible" parent="android:Theme.Translucent.NoTitleBar">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowAnimationStyle">@null</item>
-        <item name="android:windowDisablePreview">true</item>
-        <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:windowNoTitle">true</item>
+    <style name="Animation.GhostShare.Activity" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/ghost_open_enter</item>
+        <item name="android:activityOpenExitAnimation">@anim/ghost_open_exit</item>
+        <item name="android:activityCloseEnterAnimation">@anim/ghost_close_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/ghost_close_exit</item>
     </style>
+
 </resources>

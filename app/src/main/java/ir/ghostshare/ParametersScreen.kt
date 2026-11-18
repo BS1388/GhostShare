@@ -1,6 +1,5 @@
 package ir.ghostshare
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,16 +29,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ParametersScreen(
     config: GhostConfig,
     update: ((GhostConfig) -> GhostConfig) -> Unit,
+    onOpenSources: () -> Unit,
     onBack: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     var showAdd by remember { mutableStateOf(false) }
     var showRestore by remember { mutableStateOf(false) }
+    val removal = rememberRemovalState()
 
     val entries = remember(config.addedParameters, config.removedParameters) {
         config.effectiveParameters().sorted()
@@ -56,7 +56,7 @@ fun ParametersScreen(
             note = stringResource(R.string.note_parameter_wildcard),
             invalidMessage = stringResource(R.string.msg_invalid_parameter),
             existsMessage = stringResource(R.string.msg_already_exists),
-            normalize = { GhostConfig.normalizeParameter(it) },
+            normalize = { if (it.trim() == "*") null else GhostConfig.normalizeParameter(it) },
             exists = { it in config.effectiveParameters() },
             onAdd = { name ->
                 update { it.addParameter(name) }
@@ -93,6 +93,12 @@ fun ParametersScreen(
         title = stringResource(R.string.title_my_parameters),
         onBack = onBack,
         actions = {
+            IconButton(onClick = onOpenSources) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_sync),
+                    contentDescription = stringResource(R.string.cd_update)
+                )
+            }
             IconButton(onClick = { showRestore = true }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_restore),
@@ -158,24 +164,26 @@ fun ParametersScreen(
                 }
                 items(visible, key = { it }, contentType = { "parameter" }) { name ->
                     val isDefault = name in DefaultParameters.SET
-                    ListItem(
-                        colors = ghostListItemColors(),
-                        headlineContent = { Text(name, maxLines = 1) },
-                        supportingContent = {
-                            Text(stringResource(if (isDefault) R.string.label_default else R.string.label_custom))
-                        },
-                        trailingContent = {
-                            IconButton(onClick = { update { it.removeParameter(name) } }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_delete),
-                                    contentDescription = stringResource(R.string.cd_remove)
-                                )
-                            }
-                        },
-                        modifier = Modifier
-                            .animateItemPlacement()
-                            .ghostListRow()
-                    )
+                    RemovableRow(removing = removal.isRemoving(name)) {
+                        ListItem(
+                            colors = ghostListItemColors(),
+                            headlineContent = { Text(name, maxLines = 1) },
+                            supportingContent = {
+                                Text(stringResource(if (isDefault) R.string.label_default else R.string.label_custom))
+                            },
+                            trailingContent = {
+                                IconButton(
+                                    onClick = { removal.remove(name) { update { it.removeParameter(name) } } }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_delete),
+                                        contentDescription = stringResource(R.string.cd_remove)
+                                    )
+                                }
+                            },
+                            modifier = Modifier.ghostListRow()
+                        )
+                    }
                 }
             }
         }

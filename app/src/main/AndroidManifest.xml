@@ -2,18 +2,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ir.ghostshare">
 
-    <!-- مجوز ارسال اعلان برای اندروید ۱۳ تا ۱۷+ -->
+    <permission
+        android:name="io.github.bs1388.ghostshare.permission.CONTROL"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="io.github.bs1388.ghostshare.permission.CONTROL" />
+
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
         android:allowBackup="false"
+        android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.GhostShare">
 
-        <!-- نشانه‌گذاری رسمی ماژول برای تمام نسخه‌های LSPosed / EdXposed / Xposed -->
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
@@ -30,7 +37,6 @@
             android:name="xposedscope"
             android:resource="@array/xposed_scope" />
 
-        <!-- صفحه اصلی تنظیمات، نمایش وضعیت و پیوند گیت‌هاب -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -49,23 +55,22 @@
             android:exported="false"
             android:theme="@style/Theme.GhostShare" />
 
-        <!-- اکتیویتی شفاف بازگردانی لینک اصلی (حفظ سازگاری قبلی) -->
-        <activity
-            android:name=".RestoreActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Invisible"
-            android:excludeFromRecents="true"
-            android:noHistory="true" />
-
-        <!-- گیرنده اعلان و بازیابی مستقیم در پس‌زمینه بدون باز شدن برنامه -->
         <receiver
             android:name=".NotificationReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="ir.ghostshare.ACTION_SHOW_NOTIFICATION" />
-                <action android:name="ir.ghostshare.ACTION_RESTORE_CLIPBOARD" />
-            </intent-filter>
-        </receiver>
+            android:exported="false" />
 
+        <service
+            android:name=".RestoreTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_notification_ghost"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
     </application>
 </manifest>

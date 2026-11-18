@@ -9,15 +9,33 @@ android {
 
     defaultConfig {
         applicationId = "io.github.bs1388.ghostshare"
-        minSdk = 27
+        minSdk = 28
         targetSdk = 35
-        versionCode = 140
-        versionName = "1.4.0"
+        versionCode = 150
+        versionName = "1.5.0"
+    }
+
+    val ciKeystore = System.getenv("KEYSTORE_PATH")?.takeIf { it.isNotEmpty() }?.let { file(it) }?.takeIf { it.exists() }
+
+    signingConfigs {
+        if (ciKeystore != null) {
+            create("ci") {
+                storeFile = ciKeystore
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            signingConfigs.findByName("ci")?.let { signingConfig = it }
+        }
         release {
             isMinifyEnabled = false
+            isDebuggable = false
+            signingConfig = signingConfigs.findByName("ci") ?: signingConfigs.getByName("debug")
         }
     }
 
@@ -40,16 +58,14 @@ android {
 }
 
 dependencies {
-    // Xposed API — provided only, not packaged into the APK
+
     compileOnly("de.robv.android.xposed:api:82")
 
-    // AndroidX & Material 3 Design Kit
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.activity:activity-ktx:1.9.2")
 
-    // Jetpack Compose + Material 3
     implementation(platform("androidx.compose:compose-bom:2024.06.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
