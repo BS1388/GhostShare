@@ -11,8 +11,8 @@ android {
         applicationId = "io.github.bs1388.ghostshare"
         minSdk = 28
         targetSdk = 35
-        versionCode = 140
-        versionName = "1.4.0"
+        versionCode = 160
+        versionName = "1.6.0"
     }
 
     lint {
