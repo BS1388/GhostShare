@@ -16,26 +16,12 @@
 
     <application
         android:label="@string/app_name"
+        android:description="@string/xposed_description"
         android:icon="@drawable/ic_launcher"
         android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.GhostShare">
 
-        <meta-data
-            android:name="xposedmodule"
-            android:value="true" />
-        <meta-data
-            android:name="xposedentry"
-            android:value="ir.ghostshare.HookEntry" />
-        <meta-data
-            android:name="xposeddescription"
-            android:value="Automatically strips tracking parameters (utm_*, igsh, si, fbclid, gclid, etc.) from copied links across the entire OS." />
-        <meta-data
-            android:name="xposedminversion"
-            android:value="82" />
-        <meta-data
-            android:name="xposedscope"
-            android:resource="@array/xposed_scope" />
 
         <activity
             android:name=".MainActivity"

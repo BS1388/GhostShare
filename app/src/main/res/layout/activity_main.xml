@@ -19,14 +19,64 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/layout_language_pill"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_m3_language_pill"
+                android:clickable="true"
+                android:contentDescription="@string/title_section_language"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="10dp">
+
+                <ImageView
+                    android:id="@+id/iv_language_flag"
+                    android:layout_width="26dp"
+                    android:layout_height="19dp"
+                    android:importantForAccessibility="no"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/flag_fa" />
+
+                <TextView
+                    android:id="@+id/tv_language_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/lang_persian"
+                    android:textColor="@color/m3_sys_color_on_surface"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="4dp"
+                    android:importantForAccessibility="no"
+                    android:rotation="90"
+                    android:src="@drawable/ic_chevron_right"
+                    android:tint="@color/m3_sys_color_on_surface_variant" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical"
             android:layout_marginBottom="28dp">
 
             <FrameLayout
+                android:id="@+id/layout_logo_box"
                 android:layout_width="72dp"
                 android:layout_height="72dp"
-                android:background="@drawable/bg_m3_icon_box_primary">
+                android:background="@drawable/bg_m3_logo_box_inactive">
 
                 <ImageView
                     android:layout_width="48dp"
@@ -154,98 +204,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_m3_card"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:layout_marginBottom="24dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
-
-                <FrameLayout
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:background="@drawable/bg_m3_icon_box_tertiary"
-                    android:layout_marginEnd="14dp">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_translate"
-                        android:contentDescription="@string/title_section_language" />
-                </FrameLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_section_language"
-                        android:textColor="@color/m3_sys_color_on_surface"
-                        android:textSize="15.5sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:text="@string/desc_language_selection"
-                        android:textColor="@color/m3_sys_color_on_surface_variant"
-                        android:textSize="12.5sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:background="@drawable/bg_m3_segmented_container"
-                android:orientation="horizontal"
-                android:padding="3dp">
-
-                <TextView
-                    android:id="@+id/btn_lang_fa"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_m3_segment_active"
-                    android:text="@string/lang_persian"
-                    android:textColor="@color/m3_sys_color_on_primary_container"
-                    android:textSize="13.5sp"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_marginEnd="2dp" />
-
-                <TextView
-                    android:id="@+id/btn_lang_en"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_m3_segment_inactive"
-                    android:text="@string/lang_english"
-                    android:textColor="@color/m3_sys_color_on_surface_variant"
-                    android:textSize="13.5sp"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_marginStart="2dp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/card_link_test"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -367,63 +325,6 @@
                 android:layout_height="20dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_chevron_right" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/title_section_how_it_works"
-            android:textColor="@color/m3_sys_color_primary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_m3_card"
-            android:orientation="vertical"
-            android:padding="18dp"
-            android:layout_marginBottom="24dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="10dp">
-
-                <FrameLayout
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:background="@drawable/bg_m3_icon_box_tertiary"
-                    android:layout_marginEnd="12dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_info"
-                        android:contentDescription="Info" />
-                </FrameLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_how_it_works"
-                    android:textColor="@color/m3_sys_color_on_surface"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/desc_how_it_works"
-                android:textColor="@color/m3_sys_color_on_surface_variant"
-                android:textSize="13sp"
-                android:lineSpacingExtra="4dp" />
         </LinearLayout>
 
         <TextView

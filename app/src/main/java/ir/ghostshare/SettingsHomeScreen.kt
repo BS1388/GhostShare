@@ -216,19 +216,11 @@ fun SettingsHomeScreen(
             )
 
             SectionTitle(stringResource(R.string.title_section_links))
-            SwitchCard(
+            ActionCard(
                 icon = R.drawable.ic_link,
                 title = stringResource(R.string.title_redirect),
                 description = stringResource(R.string.desc_redirect),
-                checked = config.redirectUnwrap,
-                onCheckedChange = { on -> update { it.copy(redirectUnwrap = on) } }
-            )
-            Spacer(Modifier.height(12.dp))
-            ActionCard(
-                icon = R.drawable.ic_link,
-                title = stringResource(R.string.title_redirect_rules),
-                description = stringResource(R.string.desc_redirect_rules),
-                value = config.redirectRules.size.toString(),
+                value = if (config.redirectUnwrap) config.redirectRules.size.toString() else stringResource(R.string.tile_state_off),
                 onClick = { onNavigate(SettingsScreen.REDIRECT_RULES) }
             )
 

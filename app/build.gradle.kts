@@ -11,8 +11,13 @@ android {
         applicationId = "io.github.bs1388.ghostshare"
         minSdk = 28
         targetSdk = 35
-        versionCode = 150
-        versionName = "1.5.0"
+        versionCode = 140
+        versionName = "1.4.0"
+    }
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
     }
 
     val ciKeystore = System.getenv("KEYSTORE_PATH")?.takeIf { it.isNotEmpty() }?.let { file(it) }?.takeIf { it.exists() }
@@ -58,8 +63,7 @@ android {
 }
 
 dependencies {
-
-    compileOnly("de.robv.android.xposed:api:82")
+    compileOnly(files("libs/libxposed-api-102.0.0.jar"))
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")

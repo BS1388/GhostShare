@@ -39,6 +39,7 @@ fun ParametersScreen(
     var query by remember { mutableStateOf("") }
     var showAdd by remember { mutableStateOf(false) }
     var showRestore by remember { mutableStateOf(false) }
+    var showHelp by remember { mutableStateOf(false) }
     val removal = rememberRemovalState()
 
     val entries = remember(config.addedParameters, config.removedParameters) {
@@ -89,10 +90,31 @@ fun ParametersScreen(
         )
     }
 
+    if (showHelp) {
+        GuideDialog(
+            title = R.string.title_params_help,
+            sections = listOf(
+                GuideSection(R.string.help_params_what_title, R.string.help_params_what_body),
+                GuideSection(R.string.help_params_add_title, R.string.help_params_add_body),
+                GuideSection(R.string.help_params_delete_title, R.string.help_params_delete_body),
+                GuideSection(R.string.help_params_update_title, R.string.help_params_update_body),
+                GuideSection(R.string.help_params_priority_title, R.string.help_params_priority_body),
+                GuideSection(R.string.help_rules_test_title, R.string.help_rules_test_body)
+            ),
+            onDismiss = { showHelp = false }
+        )
+    }
+
     ScreenScaffold(
         title = stringResource(R.string.title_my_parameters),
         onBack = onBack,
         actions = {
+            IconButton(onClick = { showHelp = true }) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_help),
+                    contentDescription = stringResource(R.string.cd_help)
+                )
+            }
             IconButton(onClick = onOpenSources) {
                 Icon(
                     painter = painterResource(R.drawable.ic_sync),

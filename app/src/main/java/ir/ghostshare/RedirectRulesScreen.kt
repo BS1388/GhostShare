@@ -37,6 +37,7 @@ fun RedirectRulesScreen(
 ) {
     var showAdd by remember { mutableStateOf(false) }
     var showRestore by remember { mutableStateOf(false) }
+    var showHelp by remember { mutableStateOf(false) }
     val removal = rememberRemovalState()
     val rules = config.redirectRules.sortedBy { sortKey(it) }
 
@@ -80,10 +81,31 @@ fun RedirectRulesScreen(
         )
     }
 
+    if (showHelp) {
+        GuideDialog(
+            title = R.string.title_redirect_help,
+            sections = listOf(
+                GuideSection(R.string.help_redir_what_title, R.string.help_redir_what_body),
+                GuideSection(R.string.help_redir_switch_title, R.string.help_redir_switch_body),
+                GuideSection(R.string.help_redir_rule_title, R.string.help_redir_rule_body),
+                GuideSection(R.string.help_redir_safety_title, R.string.help_redir_safety_body),
+                GuideSection(R.string.help_redir_update_title, R.string.help_redir_update_body),
+                GuideSection(R.string.help_rules_test_title, R.string.help_rules_test_body)
+            ),
+            onDismiss = { showHelp = false }
+        )
+    }
+
     ScreenScaffold(
-        title = stringResource(R.string.title_redirect_rules),
+        title = stringResource(R.string.title_redirect),
         onBack = onBack,
         actions = {
+            IconButton(onClick = { showHelp = true }) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_help),
+                    contentDescription = stringResource(R.string.cd_help)
+                )
+            }
             IconButton(onClick = onOpenSources) {
                 Icon(
                     painter = painterResource(R.drawable.ic_sync),
@@ -115,6 +137,17 @@ fun RedirectRulesScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(top = 4.dp, bottom = 96.dp)
             ) {
+                item(key = "switch") {
+                    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        SwitchCard(
+                            icon = R.drawable.ic_link,
+                            title = stringResource(R.string.title_redirect),
+                            description = stringResource(R.string.desc_redirect),
+                            checked = config.redirectUnwrap,
+                            onCheckedChange = { on -> update { it.copy(redirectUnwrap = on) } }
+                        )
+                    }
+                }
                 item(key = "note") {
                     Text(
                         text = stringResource(R.string.desc_redirect_rules_screen),

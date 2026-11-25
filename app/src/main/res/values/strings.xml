@@ -8,12 +8,11 @@
     <string name="title_section_settings">Main Settings</string>
     <string name="title_section_language">App Language</string>
     <string name="desc_language_selection">Select interface language</string>
-    <string name="lang_persian">فارسی</string>
+    <string name="lang_persian">Persian</string>
     <string name="lang_english">English</string>
     <string name="msg_lang_changed">Language switched to English</string>
     <string name="msg_browser_not_found">Could not find a web browser</string>
 
-    <string name="title_section_how_it_works">How It Works</string>
     <string name="title_section_community">Source Code &amp; Community</string>
 
     <string name="status_active">System Framework (LSPosed): Active</string>
@@ -40,8 +39,7 @@
     <string name="notif_text_with_package">Tracking parameters removed (%1$s).</string>
     <string name="notif_text_generic">Tracking parameters removed from clipboard.</string>
 
-    <string name="title_how_it_works">Global Background Operation</string>
-    <string name="desc_how_it_works">GhostShare hooks into the Android OS core (system_server) and ClipboardManager to intercept copied links instantly, stripping advertising and analytic tracking parameters without breaking original content.</string>
+
 
     <string name="tracker_youtube">YouTube &amp; YouTube Music</string>
     <string name="tracker_spotify">Spotify</string>
@@ -56,11 +54,7 @@
     <string name="title_github">Source Code on GitHub</string>
     <string name="desc_github">View repository, star, and contribute to GhostShare</string>
     <string name="github_repo_tag">BS1388 / GhostShare</string>
-
-    <string-array name="xposed_scope">
-        <item>android</item>
-        <item>io.github.bs1388.ghostshare</item>
-    </string-array>
+    <string name="xposed_description">Automatically strips tracking parameters (utm_*, igsh, si, fbclid, gclid, etc.) from copied links across the entire OS.</string>
 
     <string name="title_advanced_settings">Advanced settings</string>
     <string name="desc_advanced_settings">Per-app rules, parameters, exceptions and JSON backup</string>
@@ -201,8 +195,6 @@
     <string name="cd_clear">Clear</string>
     <string name="tile_state_on">On</string>
     <string name="tile_state_off">Off</string>
-    <string name="title_redirect_rules">Redirect rules</string>
-    <string name="desc_redirect_rules">Patterns used to find the real destination inside wrapper links</string>
     <string name="desc_redirect_rules_screen">Each rule is a regular expression that finds the real destination inside a wrapper link. It must start with ^http and contain one capture group around the destination.</string>
     <string name="title_add_redirect_rule">Add rule</string>
     <string name="hint_redirect_rule">Regular expression</string>
@@ -212,4 +204,37 @@
     <string name="title_update_redirects">Update redirect rules</string>
     <string name="desc_update_redirects">Tap a source to fetch its latest rules and add them to your list.</string>
     <string name="note_source_url_redirects">A direct https link or a GitHub file link. One rule per line, or a ClearURLs data.min.json file.</string>
+    <string name="title_params_help">Parameters guide</string>
+    <string name="help_params_what_title">What is a parameter?</string>
+    <string name="help_params_what_body">A parameter is the part of a link after the ?, for example utm_source=twitter in site.com/page?utm_source=twitter. Every parameter in this list is removed from links on all websites.</string>
+    <string name="help_params_add_title">Adding a parameter</string>
+    <string name="help_params_add_body">• Type one name at a time, for example fbclid.\n• Names are not case sensitive.\n• A star (*) at the end means “anything that starts with this”. utm_* removes utm_source, utm_medium, utm_campaign and the rest.\n• A lone star is not allowed here. To remove every parameter on one website, use a site rule instead.</string>
+    <string name="help_params_delete_title">Deleting a parameter</string>
+    <string name="help_params_delete_body">Deleting a parameter stops the app from removing it, and updating from the internet never adds it back.\nIf you delete an exact name, it is also kept when a star name such as utm_* would match it.</string>
+    <string name="help_params_update_title">Update and restore</string>
+    <string name="help_params_update_body">• The update button fetches online lists (GhostShare, AdGuard, ClearURLs) and adds only the new names.\n• Names that often break links, such as id, q, v and p, are skipped when they come from online lists.\n• The restore button brings back the default list and clears your additions and deletions.</string>
+    <string name="help_params_priority_title">Priority</string>
+    <string name="help_params_priority_body">1. Excluded websites: nothing is changed there.\n2. Site rules can keep a parameter on one website.\n3. This list applies to every other link.\nImportant YouTube parameters (v, t, start, list, index) are always protected.</string>
+    <string name="title_exceptions_help">Excluded websites guide</string>
+    <string name="help_exc_what_title">What is an excluded website?</string>
+    <string name="help_exc_what_body">A website on this list is left completely untouched: its links are not cleaned and wrapper links are not opened. Subdomains are included, so example.com also covers www.example.com and app.example.com.</string>
+    <string name="help_exc_add_title">Adding a website</string>
+    <string name="help_exc_add_body">Type only the site name, like example.com. If you paste a full link, the site name is taken from it automatically.</string>
+    <string name="help_exc_when_title">When should I use it?</string>
+    <string name="help_exc_when_body">Use it when a website stops working after cleaning, for example login pages, payment pages, or one-time download links whose parameters must stay.</string>
+    <string name="help_exc_priority_title">Priority</string>
+    <string name="help_exc_priority_body">This list is checked first, before site rules, parameters and redirect rules. If a link is excluded, nothing else is applied to it.</string>
+    <string name="help_exc_update_title">Update and restore</string>
+    <string name="help_exc_update_body">The update button adds websites from the online list. The restore button empties this list.</string>
+    <string name="title_redirect_help">Redirect links guide</string>
+    <string name="help_redir_what_title">What is a redirect link?</string>
+    <string name="help_redir_what_body">Some apps share wrapper links such as l.facebook.com/l.php?u=… or google.com/url?q=…. They pass through a tracker before reaching the real page. When this feature is on, the app finds the real destination, cleans it, and uses it instead.</string>
+    <string name="help_redir_switch_title">The switch</string>
+    <string name="help_redir_switch_body">The switch at the top turns the feature on or off. When it is off, wrapper links are never opened, only cleaned. Your rules stay saved.</string>
+    <string name="help_redir_rule_title">What is a rule?</string>
+    <string name="help_redir_rule_body">Each rule is a regular expression (regex) that finds the destination inside a wrapper link.\n• It must start with ^http.\n• It must have a group in parentheses around the destination.\n• Example: ^https?://l\\.example\\.com/\\?u=([^&amp;]+)\nThe destination is read from the first group.</string>
+    <string name="help_redir_safety_title">Safety</string>
+    <string name="help_redir_safety_body">• Rules that are not valid are rejected when you add them and skipped when you update.\n• All rules together get a time limit of 40 milliseconds per link, so a bad rule can never freeze the phone.\n• Nested wrapper links are opened up to 3 levels deep.</string>
+    <string name="help_redir_update_title">Update and restore</string>
+    <string name="help_redir_update_body">The update button fetches rules from GhostShare and ClearURLs and adds only the new ones. The restore button brings back the default rules and removes the ones you added.</string>
 </resources>

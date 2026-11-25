@@ -17,18 +17,17 @@ import android.os.Looper
 import android.os.PersistableBundle
 import android.os.SystemClock
 import android.provider.Settings
-import de.robv.android.xposed.IXposedHookLoadPackage
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XC_MethodReplacement
-import de.robv.android.xposed.XposedBridge
-import de.robv.android.xposed.XposedHelpers
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
+import android.util.Log
+import io.github.libxposed.api.XposedInterface
+import io.github.libxposed.api.XposedModule
+import io.github.libxposed.api.XposedModuleInterface
 import java.io.File
+import java.lang.reflect.Executable
 import java.lang.reflect.Member
 import java.lang.reflect.Modifier
 import java.util.Collections
 
-class HookEntry : IXposedHookLoadPackage {
+class HookEntry : XposedModule() {
 
     companion object {
         private const val TAG = "GhostShare"
@@ -95,86 +94,93 @@ class HookEntry : IXposedHookLoadPackage {
         )
     }
 
-    override fun handleLoadPackage(lpparam: LoadPackageParam) {
-        when (lpparam.packageName) {
-            Constants.APP_PACKAGE -> hookGhostShareApp(lpparam)
-            "android" -> hookSystemServer(lpparam)
-        }
+    override fun onModuleLoaded(param: XposedModuleInterface.ModuleLoadedParam) {
+        logI("Module loaded: process=${param.processName} systemServer=${param.isSystemServer} api=$apiVersion framework=$frameworkName")
     }
 
-    private fun hookGhostShareApp(lpparam: LoadPackageParam) {
-        try {
-            val mainActivityClass = XposedHelpers.findClassIfExists("ir.ghostshare.MainActivity", lpparam.classLoader)
-            if (mainActivityClass != null) {
-                XposedBridge.hookAllMethods(mainActivityClass, "isModuleActive", object : XC_MethodReplacement() {
-                    override fun replaceHookedMethod(param: MethodHookParam): Any = true
-                })
-                XposedBridge.log("[$TAG] Successfully hooked MainActivity.isModuleActive() -> true")
-            }
+    override fun onSystemServerStarting(param: XposedModuleInterface.SystemServerStartingParam) {
+        hookSystemServer(param.classLoader)
+    }
+
+    private fun logI(message: String) {
+        try { log(Log.INFO, TAG, message) } catch (_: Throwable) {}
+    }
+
+    private fun logE(message: String) {
+        try { log(Log.ERROR, TAG, message) } catch (_: Throwable) {}
+    }
+
+    private fun findClass(name: String, loader: ClassLoader?): Class<*>? = try {
+        if (loader != null) Class.forName(name, false, loader) else Class.forName(name)
+    } catch (_: Throwable) {
+        null
+    }
+
+    private fun invokeStaticString(clazz: Class<*>, methodName: String, argument: String): Any? = try {
+        val method = clazz.getMethod(methodName, String::class.java)
+        method.isAccessible = true
+        method.invoke(null, argument)
+    } catch (_: Throwable) {
+        null
+    }
+
+    private fun hookExecutable(executable: Executable, hooker: XposedInterface.Hooker): Boolean {
+        if (executable is java.lang.reflect.Method && Modifier.isAbstract(executable.modifiers)) return false
+        return try {
+            hook(executable).intercept(hooker)
+            true
         } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Failed to hook MainActivity.isModuleActive: ${t.message}")
+            logE("Failed to hook ${executable.declaringClass.name}.${executable.name}: ${t.message}")
+            false
         }
     }
 
-    private fun hookSystemServer(lpparam: LoadPackageParam) {
+    private fun hookAllMethods(clazz: Class<*>, name: String, hooker: XposedInterface.Hooker) {
+        for (method in clazz.declaredMethods) {
+            if (method.name == name) hookExecutable(method, hooker)
+        }
+    }
+
+    private fun hookAllConstructors(clazz: Class<*>, hooker: XposedInterface.Hooker) {
+        for (constructor in clazz.declaredConstructors) {
+            hookExecutable(constructor, hooker)
+        }
+    }
+
+    private fun hookSystemServer(classLoader: ClassLoader) {
         try {
-            XposedBridge.log("[$TAG] Initializing in system_server (Android ${Build.VERSION.RELEASE}, SDK ${Build.VERSION.SDK_INT})...")
+            logI("Initializing in system_server (Android ${Build.VERSION.RELEASE}, SDK ${Build.VERSION.SDK_INT}, API $apiVersion)...")
 
             ensureSystemContext(null)
             systemContext?.let { registerSystemReceivers(it) }
 
-            hookSystemServerLifecycle(lpparam.classLoader)
-
-            hookActiveClipboardFromServiceManager(lpparam.classLoader)
-
-            hookServiceManagerAddService(lpparam.classLoader)
-
-            hookSystemServicePublish(lpparam.classLoader)
-
-            hookKnownServiceClasses(lpparam.classLoader)
-
-            scheduleContextRetries(lpparam.classLoader)
+            hookSystemServerLifecycle(classLoader)
+            hookActiveClipboardFromServiceManager(classLoader)
+            hookServiceManagerAddService(classLoader)
+            hookSystemServicePublish(classLoader)
+            hookKnownServiceClasses(classLoader)
+            scheduleContextRetries(classLoader)
         } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Safe isolation: error in hookSystemServer: ${t.message}")
+            logE("Safe isolation: error in hookSystemServer: ${t.message}")
         }
     }
 
     private fun hookSystemServerLifecycle(classLoader: ClassLoader) {
         try {
-            val atClass = Class.forName("android.app.ActivityThread")
-            XposedBridge.hookAllMethods(atClass, "systemMain", object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
-                    val thread = param.result
-                    if (thread != null) {
-                        try {
-                            val getCtx = thread.javaClass.getMethod("getSystemContext")
-                            val ctx = getCtx.invoke(thread) as? Context
-                            if (ctx != null) {
-                                systemContext = ctx
-                                registerSystemReceivers(ctx)
-                            }
-                        } catch (_: Throwable) {}
-                    }
-                }
-            })
-        } catch (_: Throwable) {}
-
-        try {
-            val systemServerClass = XposedHelpers.findClassIfExists("com.android.server.SystemServer", classLoader)
-            if (systemServerClass != null) {
-                val lifecycleHook = object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        ensureSystemContext(null)
-                        systemContext?.let { registerSystemReceivers(it) }
-                        hookActiveClipboardFromServiceManager(classLoader)
-                    }
-                }
-                XposedBridge.hookAllMethods(systemServerClass, "run", lifecycleHook)
-                XposedBridge.hookAllMethods(systemServerClass, "startOtherServices", lifecycleHook)
-                XposedBridge.hookAllMethods(systemServerClass, "startBootstrapServices", lifecycleHook)
+            val systemServerClass = findClass("com.android.server.SystemServer", classLoader) ?: return
+            val lifecycleHooker = XposedInterface.Hooker { chain ->
+                val result = chain.proceed()
+                try {
+                    ensureSystemContext(null)
+                    systemContext?.let { registerSystemReceivers(it) }
+                    hookActiveClipboardFromServiceManager(classLoader)
+                } catch (_: Throwable) {}
+                result
             }
+            hookAllMethods(systemServerClass, "startOtherServices", lifecycleHooker)
+            hookAllMethods(systemServerClass, "startBootstrapServices", lifecycleHooker)
         } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Warning: could not hook SystemServer lifecycle: ${t.message}")
+            logE("Warning: could not hook SystemServer lifecycle: ${t.message}")
         }
     }
 
@@ -183,7 +189,6 @@ class HookEntry : IXposedHookLoadPackage {
         for (delay in retries) {
             getMainHandler()?.postDelayed({
                 try {
-
                     if (systemContext != null && systemReceiversRegistered) {
                         return@postDelayed
                     }
@@ -199,136 +204,127 @@ class HookEntry : IXposedHookLoadPackage {
 
     private fun hookActiveClipboardFromServiceManager(classLoader: ClassLoader) {
         try {
-            val smClass = XposedHelpers.findClassIfExists("android.os.ServiceManager", classLoader)
-                ?: XposedHelpers.findClassIfExists("android.os.ServiceManager", null)
-            if (smClass != null) {
-                val binder = XposedHelpers.callStaticMethod(smClass, "getService", Context.CLIPBOARD_SERVICE)
-                    ?: XposedHelpers.callStaticMethod(smClass, "checkService", Context.CLIPBOARD_SERVICE)
-                    ?: XposedHelpers.callStaticMethod(smClass, "getService", "clipboard")
-                    ?: XposedHelpers.callStaticMethod(smClass, "checkService", "clipboard")
+            val smClass = findClass("android.os.ServiceManager", classLoader)
+                ?: findClass("android.os.ServiceManager", null)
+                ?: return
+            val binder = invokeStaticString(smClass, "getService", Context.CLIPBOARD_SERVICE)
+                ?: invokeStaticString(smClass, "checkService", Context.CLIPBOARD_SERVICE)
+                ?: invokeStaticString(smClass, "getService", "clipboard")
+                ?: invokeStaticString(smClass, "checkService", "clipboard")
 
-                if (binder != null) {
-                    XposedBridge.log("[$TAG] Found active clipboard binder: ${binder.javaClass.name}")
-                    hookClipboardMethods(binder.javaClass)
-                }
+            if (binder != null) {
+                logI("Found active clipboard binder: ${binder.javaClass.name}")
+                hookClipboardMethods(binder.javaClass)
             }
         } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Warning: could not inspect active ServiceManager binder: ${t.message}")
+            logE("Warning: could not inspect active ServiceManager binder: ${t.message}")
         }
     }
 
     private fun hookServiceManagerAddService(classLoader: ClassLoader) {
         try {
-            val smClass = XposedHelpers.findClassIfExists("android.os.ServiceManager", classLoader)
-                ?: XposedHelpers.findClassIfExists("android.os.ServiceManager", null)
-            if (smClass != null) {
-                XposedBridge.hookAllMethods(smClass, "addService", object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        try {
-                            val name = param.args.getOrNull(0) as? String
-                            if (name == Context.CLIPBOARD_SERVICE || name == "clipboard") {
-                                val binderObj = param.args.getOrNull(1)
-                                if (binderObj != null) {
-                                    XposedBridge.log("[$TAG] ServiceManager.addService detected: ${binderObj.javaClass.name}")
-                                    hookClipboardMethods(binderObj.javaClass)
-                                }
-                            }
-                        } catch (t: Throwable) {
-                            XposedBridge.log("[$TAG] Error in ServiceManager hook: ${t.message}")
+            val smClass = findClass("android.os.ServiceManager", classLoader)
+                ?: findClass("android.os.ServiceManager", null)
+                ?: return
+            hookAllMethods(smClass, "addService", XposedInterface.Hooker { chain ->
+                try {
+                    val name = chain.args.getOrNull(0) as? String
+                    if (name == Context.CLIPBOARD_SERVICE || name == "clipboard") {
+                        val binderObj = chain.args.getOrNull(1)
+                        if (binderObj != null) {
+                            logI("ServiceManager.addService detected: ${binderObj.javaClass.name}")
+                            hookClipboardMethods(binderObj.javaClass)
                         }
                     }
-                })
-            }
+                } catch (t: Throwable) {
+                    logE("Error in ServiceManager hook: ${t.message}")
+                }
+                chain.proceed()
+            })
         } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Warning: could not hook ServiceManager.addService: ${t.message}")
+            logE("Warning: could not hook ServiceManager.addService: ${t.message}")
         }
     }
 
     private fun hookSystemServicePublish(classLoader: ClassLoader) {
         try {
-            val systemServiceClass = XposedHelpers.findClassIfExists("com.android.server.SystemService", classLoader)
-            if (systemServiceClass != null) {
-                XposedBridge.hookAllMethods(systemServiceClass, "publishBinderService", object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
+            val systemServiceClass = findClass("com.android.server.SystemService", classLoader) ?: return
+            hookAllMethods(systemServiceClass, "publishBinderService", XposedInterface.Hooker { chain ->
+                try {
+                    val svc = chain.thisObject
+                    if (svc != null && systemContext == null) {
                         try {
-                            val svc = param.thisObject
-                            if (svc != null && systemContext == null) {
-                                try {
-                                    val getCtx = svc.javaClass.getMethod("getContext")
-                                    val ctx = getCtx.invoke(svc) as? Context
-                                    if (ctx != null) {
-                                        systemContext = ctx
-                                        registerSystemReceivers(ctx)
-                                    }
-                                } catch (_: Throwable) {}
+                            val getCtx = svc.javaClass.getMethod("getContext")
+                            val ctx = getCtx.invoke(svc) as? Context
+                            if (ctx != null) {
+                                systemContext = ctx
+                                registerSystemReceivers(ctx)
                             }
-                            val name = param.args.getOrNull(0) as? String
-                            if (name == Context.CLIPBOARD_SERVICE || name == "clipboard") {
-                                val binderObj = param.args.getOrNull(1)
-                                if (binderObj != null) {
-                                    XposedBridge.log("[$TAG] publishBinderService: ${binderObj.javaClass.name}")
-                                    hookClipboardMethods(binderObj.javaClass)
-                                }
-                            }
-                        } catch (t: Throwable) {
-                            XposedBridge.log("[$TAG] Error in publishBinderService: ${t.message}")
+                        } catch (_: Throwable) {}
+                    }
+                    val name = chain.args.getOrNull(0) as? String
+                    if (name == Context.CLIPBOARD_SERVICE || name == "clipboard") {
+                        val binderObj = chain.args.getOrNull(1)
+                        if (binderObj != null) {
+                            logI("publishBinderService: ${binderObj.javaClass.name}")
+                            hookClipboardMethods(binderObj.javaClass)
                         }
                     }
-                })
-            }
+                } catch (t: Throwable) {
+                    logE("Error in publishBinderService: ${t.message}")
+                }
+                chain.proceed()
+            })
         } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Warning: could not hook SystemService: ${t.message}")
+            logE("Warning: could not hook SystemService: ${t.message}")
         }
     }
 
     private fun hookKnownServiceClasses(classLoader: ClassLoader) {
         for (serviceName in SERVICE_CLASS_NAMES) {
-            val serviceClass = XposedHelpers.findClassIfExists(serviceName, classLoader) ?: continue
+            val serviceClass = findClass(serviceName, classLoader) ?: continue
 
             try {
-                XposedBridge.hookAllConstructors(serviceClass, object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        try {
-                            val svc = param.thisObject
-                            if (svc != null) {
-                                try {
-                                    val getCtx = svc.javaClass.getMethod("getContext")
-                                    val ctx = getCtx.invoke(svc) as? Context
-                                    if (ctx != null) {
-                                        systemContext = ctx
-                                        registerSystemReceivers(ctx)
-                                    }
-                                } catch (_: Throwable) {
-                                    val ctx = param.args.firstOrNull { it is Context } as? Context
-                                    if (ctx != null) {
-                                        systemContext = ctx
-                                        registerSystemReceivers(ctx)
-                                    }
+                hookAllConstructors(serviceClass, XposedInterface.Hooker { chain ->
+                    val result = chain.proceed()
+                    try {
+                        val svc = chain.thisObject
+                        if (svc != null) {
+                            try {
+                                val getCtx = svc.javaClass.getMethod("getContext")
+                                val ctx = getCtx.invoke(svc) as? Context
+                                if (ctx != null) {
+                                    systemContext = ctx
+                                    registerSystemReceivers(ctx)
+                                }
+                            } catch (_: Throwable) {
+                                val ctx = chain.args.firstOrNull { it is Context } as? Context
+                                if (ctx != null) {
+                                    systemContext = ctx
+                                    registerSystemReceivers(ctx)
                                 }
                             }
-                        } catch (t: Throwable) {
-                            XposedBridge.log("[$TAG] Failed to capture context from constructor: ${t.message}")
                         }
+                    } catch (t: Throwable) {
+                        logE("Failed to capture context from constructor: ${t.message}")
                     }
+                    result
                 })
             } catch (_: Throwable) {}
 
             try {
-                XposedBridge.hookAllMethods(serviceClass, "clipboardAccessAllowed", object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        try {
-                            val isGhostShare = param.args.any { it is String && it == Constants.APP_PACKAGE }
-                            if (isGhostShare) {
-                                param.result = true
-                            }
-                        } catch (_: Throwable) {}
-                    }
+                hookAllMethods(serviceClass, "clipboardAccessAllowed", XposedInterface.Hooker { chain ->
+                    var allowed = false
+                    try {
+                        allowed = chain.args.any { it is String && it == Constants.APP_PACKAGE }
+                    } catch (_: Throwable) {}
+                    if (allowed) true else chain.proceed()
                 })
             } catch (_: Throwable) {}
 
             hookClipboardMethods(serviceClass)
 
-            val implClass = XposedHelpers.findClassIfExists("$serviceName\$ClipboardImpl", classLoader)
+            val implClass = findClass("$serviceName\$ClipboardImpl", classLoader)
             if (implClass != null) {
                 hookClipboardMethods(implClass)
             }
@@ -353,41 +349,46 @@ class HookEntry : IXposedHookLoadPackage {
                 if (isTargetMethodName && !Modifier.isAbstract(method.modifiers)) {
                     val hasClipDataParam = method.parameterTypes.any { ClipData::class.java.isAssignableFrom(it) }
                     if (hasClipDataParam && hookedMethods.add(method)) {
-                        try { method.isAccessible = true } catch (_: Throwable) {}
-                        XposedBridge.hookMethod(method, clipMethodHook)
-                        val paramSignature = method.parameterTypes.joinToString(", ") { it.simpleName }
-                        XposedBridge.log("[$TAG] Hooked system method: ${method.declaringClass.name}.${method.name}($paramSignature)")
+                        if (hookExecutable(method, clipHooker)) {
+                            val paramSignature = method.parameterTypes.joinToString(", ") { it.simpleName }
+                            logI("Hooked system method: ${method.declaringClass.name}.${method.name}($paramSignature)")
+                        } else {
+                            hookedMethods.remove(method)
+                        }
                     }
                 }
             }
         } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Failed to inspect methods on class ${clazz.name}: ${t.message}")
+            logE("Failed to inspect methods on class ${clazz.name}: ${t.message}")
         }
     }
 
-    private val clipMethodHook = object : XC_MethodHook() {
-        override fun beforeHookedMethod(param: MethodHookParam) {
-            if (isProcessing.get() == true) return
+    private val clipHooker = XposedInterface.Hooker { chain ->
+        if (isProcessing.get() == true) {
+            chain.proceed()
+        } else {
+            var replacement: Array<Any?>? = null
             try {
                 isProcessing.set(true)
-                handleSystemSetPrimaryClip(param)
+                replacement = handleSystemSetPrimaryClip(chain)
             } catch (t: Throwable) {
-                XposedBridge.log("[$TAG] Error inside system setPrimaryClip hook: ${t.message}")
+                logE("Error inside system setPrimaryClip hook: ${t.message}")
             } finally {
-
                 isProcessing.remove()
             }
+            if (replacement != null) chain.proceed(replacement) else chain.proceed()
         }
     }
 
-    private fun handleSystemSetPrimaryClip(param: XC_MethodHook.MethodHookParam) {
-        val clipIndex = param.args.indexOfFirst { it is ClipData }
-        if (clipIndex == -1) return
+    private fun handleSystemSetPrimaryClip(chain: XposedInterface.Chain): Array<Any?>? {
+        val args = chain.args
+        val clipIndex = args.indexOfFirst { it is ClipData }
+        if (clipIndex == -1) return null
 
-        val originalClip = param.args[clipIndex] as? ClipData ?: return
+        val originalClip = args[clipIndex] as? ClipData ?: return null
 
-        val callingPackage = (param.args.getOrNull(1) as? String)
-            ?: (param.args.firstOrNull { it is String } as? String)
+        val callingPackage = (args.getOrNull(1) as? String)
+            ?: (args.firstOrNull { it is String } as? String)
             ?: ""
 
         val description = originalClip.description
@@ -397,41 +398,47 @@ class HookEntry : IXposedHookLoadPackage {
         if (callingPackage == Constants.APP_PACKAGE ||
             clipLabel == Constants.LABEL_RESTORED_LINK ||
             extras?.getBoolean(Constants.EXTRA_BYPASS_CLEAN, false) == true) {
-            XposedBridge.log("[$TAG] Restored clip detected. Preserving without cleaning or notifications.")
+            logI("Restored clip detected. Preserving without cleaning or notifications.")
             try { extras?.remove(Constants.EXTRA_BYPASS_CLEAN) } catch (_: Throwable) { description?.extras = null }
-            return
+            return null
         }
 
         val firstText = originalClip.getItemAt(0)?.text?.toString()
         if (isRecentlyRestored(firstText)) {
-            XposedBridge.log("[$TAG] Recently restored link detected via memory cache. Skipping.")
-            return
+            logI("Recently restored link detected via memory cache. Skipping.")
+            return null
         }
 
+        val thisObject = chain.thisObject
+
         if (!systemReceiversRegistered) {
-            ensureSystemContext(param.thisObject)
+            ensureSystemContext(thisObject)
             systemContext?.let { registerSystemReceivers(it) }
         }
 
         if (!config.shouldClean(callingPackage)) {
-            XposedBridge.log("[$TAG] Per-app rule: skipping ${if (callingPackage.isNotEmpty()) callingPackage else "unknown"}")
-            return
+            logI("Per-app rule: skipping ${if (callingPackage.isNotEmpty()) callingPackage else "unknown"}")
+            return null
         }
 
-        val cleanResult = cleanClipData(originalClip) ?: return
+        val cleanResult = cleanClipData(originalClip) ?: return null
 
-        param.args[clipIndex] = cleanResult.newClip
+        val newArgs = arrayOfNulls<Any>(args.size)
+        for (i in args.indices) newArgs[i] = args[i]
+        newArgs[clipIndex] = cleanResult.newClip
 
-        XposedBridge.log("[$TAG] Cleaned clipboard (system_server) for: ${if (callingPackage.isNotEmpty()) callingPackage else "unknown"}")
+        logI("Cleaned clipboard (system_server) for: ${if (callingPackage.isNotEmpty()) callingPackage else "unknown"}")
 
-        ensureSystemContext(param.thisObject)
+        ensureSystemContext(thisObject)
         systemContext?.let { registerSystemReceivers(it) }
 
         if (showRestoreNotification) {
             cleanResult.firstOriginalText?.let { originalText ->
-                dispatchRestoreNotification(param.thisObject, originalText, callingPackage)
+                dispatchRestoreNotification(thisObject, originalText, callingPackage)
             }
         }
+
+        return newArgs
     }
 
     private fun dispatchRestoreNotification(thisObject: Any?, originalText: String, callingPackage: String) {
@@ -450,10 +457,10 @@ class HookEntry : IXposedHookLoadPackage {
                 }
                 ctx.sendBroadcast(explicitIntent)
             } catch (t: Throwable) {
-                XposedBridge.log("[$TAG] Failed to send restore notification: ${t.message}")
+                logE("Failed to send restore notification: ${t.message}")
             }
         } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Error dispatching restore notification: ${t.message}")
+            logE("Error dispatching restore notification: ${t.message}")
         } finally {
             Binder.restoreCallingIdentity(token)
         }
@@ -598,12 +605,12 @@ class HookEntry : IXposedHookLoadPackage {
                                         true
                                     )
                                     showRestoreNotification = enabled
-                                    XposedBridge.log("[$TAG] Settings updated live: showRestoreNotification = $enabled")
+                                    logI("Settings updated live: showRestoreNotification = $enabled")
                                     GhostConfig.decode(intent.getStringExtra(Constants.EXTRA_CONFIG))?.let { applyConfig(it) }
                                 }
                                 Constants.ACTION_CHECK_STATUS -> {
                                     resultCode = Activity.RESULT_OK
-                                    XposedBridge.log("[$TAG] Status check received in system_server -> RESULT_OK")
+                                    logI("Status check received in system_server -> RESULT_OK")
                                 }
                                 Constants.ACTION_RESTORE_CLIPBOARD -> {
                                     val original = intent.getStringExtra(Constants.EXTRA_ORIGINAL_LINK)
@@ -618,9 +625,9 @@ class HookEntry : IXposedHookLoadPackage {
                                             }
                                             clipData.description.extras = bypassExtras
                                             cm?.setPrimaryClip(clipData)
-                                            XposedBridge.log("[$TAG] Successfully restored original link to clipboard from system_server")
+                                            logI("Successfully restored original link to clipboard from system_server")
                                         } catch (t: Throwable) {
-                                            XposedBridge.log("[$TAG] Failed to restore clip in system_server: ${t.message}")
+                                            logE("Failed to restore clip in system_server: ${t.message}")
                                         }
 
                                         if (!intent.getBooleanExtra("from_app", false)) {
@@ -637,7 +644,7 @@ class HookEntry : IXposedHookLoadPackage {
                                 }
                             }
                         } catch (t: Throwable) {
-                            XposedBridge.log("[$TAG] Error handling system broadcast: ${t.message}")
+                            logE("Error handling system broadcast: ${t.message}")
                         }
                     }
                 }
@@ -654,7 +661,7 @@ class HookEntry : IXposedHookLoadPackage {
                 ctx.registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_UNLOCKED), null, configHandler, privateFlag)
 
                 systemReceiversRegistered = true
-                XposedBridge.log("[$TAG] System receivers successfully registered in system_server")
+                logI("System receivers successfully registered in system_server")
 
                 configHandler.post {
                     try {
@@ -663,7 +670,7 @@ class HookEntry : IXposedHookLoadPackage {
                     reloadFromApp(ctx)
                 }
             } catch (t: Throwable) {
-                XposedBridge.log("[$TAG] Warning: could not register system receivers: ${t.message}")
+                logI("Warning: could not register system receivers: ${t.message}")
             }
         }
     }
@@ -671,7 +678,7 @@ class HookEntry : IXposedHookLoadPackage {
     private fun applyConfig(newConfig: GhostConfig) {
         config = newConfig
         newConfig.applyToCleaner()
-        XposedBridge.log("[$TAG] Config applied: perApp=${newConfig.perAppEnabled}(${newConfig.perAppPackages.size}) bypass=${newConfig.bypassEnabled}(${newConfig.bypassPackages.size}) redirect=${newConfig.redirectUnwrap} params=+${newConfig.addedParameters.size}/-${newConfig.removedParameters.size} exceptions=${newConfig.exceptionDomains.size}")
+        logI("Config applied: perApp=${newConfig.perAppEnabled}(${newConfig.perAppPackages.size}) bypass=${newConfig.bypassEnabled}(${newConfig.bypassPackages.size}) redirect=${newConfig.redirectUnwrap} params=+${newConfig.addedParameters.size}/-${newConfig.removedParameters.size} exceptions=${newConfig.exceptionDomains.size}")
     }
 
     private fun reloadFromApp(ctx: Context) {
@@ -679,7 +686,7 @@ class HookEntry : IXposedHookLoadPackage {
             showRestoreNotification = loadSettingsFromApp(ctx)
             applyConfig(loadConfigFromApp(ctx) ?: config)
         } catch (t: Throwable) {
-            XposedBridge.log("[$TAG] Failed to reload config: ${t.message}")
+            logE("Failed to reload config: ${t.message}")
         }
     }
 

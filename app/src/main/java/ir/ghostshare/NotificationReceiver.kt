@@ -52,7 +52,6 @@ class NotificationReceiver : BroadcastReceiver() {
                 val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
                     try {
                         nm.deleteNotificationChannel("ghostshare_clipboard")
                         nm.deleteNotificationChannel("ghostshare_clipboard_v2")
@@ -149,7 +148,6 @@ class NotificationReceiver : BroadcastReceiver() {
             Constants.ACTION_RESTORE_CLIPBOARD -> {
                 val originalText = intent.getStringExtra(Constants.EXTRA_ORIGINAL_LINK)
                 if (!originalText.isNullOrEmpty()) {
-
                     try {
                         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
                         nm?.cancel(NOTIF_ID)

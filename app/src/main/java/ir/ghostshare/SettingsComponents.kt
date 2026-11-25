@@ -1,6 +1,7 @@
 package ir.ghostshare
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
@@ -20,8 +21,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -347,4 +350,41 @@ fun AddEntryDialog(
             }
         }
     )
+}
+
+class GuideSection(@StringRes val title: Int, @StringRes val body: Int)
+
+@Composable
+fun GuideDialog(@StringRes title: Int, sections: List<GuideSection>, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(title)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                sections.forEachIndexed { index, section ->
+                    GuideEntry(section, last = index == sections.lastIndex)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.btn_got_it))
+            }
+        }
+    )
+}
+
+@Composable
+private fun GuideEntry(section: GuideSection, last: Boolean) {
+    Text(
+        text = stringResource(section.title),
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary
+    )
+    Spacer(Modifier.height(4.dp))
+    Text(
+        text = stringResource(section.body),
+        style = MaterialTheme.typography.bodyMedium
+    )
+    if (!last) Spacer(Modifier.height(16.dp))
 }

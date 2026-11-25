@@ -38,7 +38,6 @@ fun LinkTestScreen(
 ) {
     var input by rememberSaveable { mutableStateOf("") }
     val clipboard = LocalClipboardManager.current
-
     val resultState = produceState<LinkTester.Result>(LinkTester.Result.Empty, input, config) {
         if (input.isBlank()) {
             value = LinkTester.Result.Empty

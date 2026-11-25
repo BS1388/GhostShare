@@ -8,12 +8,11 @@
     <string name="title_section_settings">تنظیمات اصلی</string>
     <string name="title_section_language">زبان برنامه</string>
     <string name="desc_language_selection">انتخاب زبان رابط کاربری</string>
-    <string name="lang_persian">فارسی</string>
-    <string name="lang_english">English</string>
+    <string name="lang_persian">پارسی</string>
+    <string name="lang_english">انگلیسی</string>
     <string name="msg_lang_changed">زبان برنامه به فارسی تغییر یافت</string>
     <string name="msg_browser_not_found">امکان باز کردن مرورگر یافت نشد</string>
 
-    <string name="title_section_how_it_works">نحوه کارکرد ماژول</string>
     <string name="title_section_community">سورس‌کد و مشارکت</string>
 
     <string name="status_active">چارچوب سیستم (LSPosed) : فعال</string>
@@ -40,8 +39,7 @@
     <string name="notif_text_with_package">پارامترهای رهگیری حذف شدند (%1$s).</string>
     <string name="notif_text_generic">پارامترهای رهگیری از کلیپ‌بورد حذف شدند.</string>
 
-    <string name="title_how_it_works">عملکرد سراسری در پس‌زمینه</string>
-    <string name="desc_how_it_works">ماژول GhostShare با تزریق به هسته سیستم‌عامل (system_server) و کلیپ‌بورد، کلیه لینک‌های کپی شده را به صورت آنی پایش کرده و پارامترهای رهگیری تبلیغاتی و تحلیلی را بدون تغییر در محتوای اصلی حذف می‌نماید.</string>
+
 
     <string name="tracker_youtube">یوتیوب و یوتیوب موزیک</string>
     <string name="tracker_spotify">اسپوتیفای</string>
@@ -56,11 +54,7 @@
     <string name="title_github">سورس‌کد در گیت‌هاب</string>
     <string name="desc_github">مشاهده مخزن، ستاره دادن و مشارکت در توسعه GhostShare</string>
     <string name="github_repo_tag">BS1388 / GhostShare</string>
-
-    <string-array name="xposed_scope">
-        <item>android</item>
-        <item>io.github.bs1388.ghostshare</item>
-    </string-array>
+    <string name="xposed_description">پارامترهای ردیابی (utm_*، igsh، si، fbclid، gclid و ...) را به‌صورت خودکار از لینک‌های کپی‌شده در کل سیستم حذف می‌کند.</string>
 
     <string name="title_advanced_settings">تنظیمات پیشرفته</string>
     <string name="desc_advanced_settings">قوانین هر برنامه، پارامترها، استثناها و پشتیبان JSON</string>
@@ -201,8 +195,6 @@
     <string name="cd_clear">پاک کردن</string>
     <string name="tile_state_on">روشن</string>
     <string name="tile_state_off">خاموش</string>
-    <string name="title_redirect_rules">قوانین ریدایرکت</string>
-    <string name="desc_redirect_rules">الگوهای پیدا کردن مقصد واقعی از داخل لینک‌های واسطه</string>
     <string name="desc_redirect_rules_screen">هر قانون یک عبارت منظم (regex) است که مقصد واقعی را از داخل لینک واسطه پیدا می‌کند. باید با ^http شروع شود و دور آدرس مقصد یک گروه (capture group) داشته باشد.</string>
     <string name="title_add_redirect_rule">افزودن قانون</string>
     <string name="hint_redirect_rule">عبارت منظم (regex)</string>
@@ -212,4 +204,37 @@
     <string name="title_update_redirects">به‌روزرسانی قوانین ریدایرکت</string>
     <string name="desc_update_redirects">روی یک منبع بزنید تا آخرین قوانینش دریافت و به فهرست شما اضافه شود.</string>
     <string name="note_source_url_redirects">لینک مستقیم https یا لینک فایل گیت‌هاب. هر خط یک قانون، یا فایل data.min.json پروژه‌ی ClearURLs.</string>
+    <string name="title_params_help">راهنمای پارامترها</string>
+    <string name="help_params_what_title">پارامتر چیست؟</string>
+    <string name="help_params_what_body">پارامتر بخشی از لینک است که بعد از ? می‌آید؛ مثلاً در site.com/page?utm_source=twitter همین utm_source=twitter یک پارامتر است. هر پارامتری که در این فهرست باشد، از لینک همه‌ی وب‌سایت‌ها حذف می‌شود.</string>
+    <string name="help_params_add_title">افزودن پارامتر</string>
+    <string name="help_params_add_body">• هر بار یک نام بنویسید، مثلاً fbclid.\n• به بزرگی و کوچکی حروف حساس نیست.\n• ستاره (*) در انتهای نام یعنی «هر چیزی که با این متن شروع شود». مثلاً utm_* همه‌ی utm_source، utm_medium، utm_campaign و مشابه‌ها را حذف می‌کند.\n• ستاره‌ی تنها اینجا مجاز نیست. برای حذف همه‌ی پارامترهای یک سایت از «قانون‌های سایت» استفاده کنید.</string>
+    <string name="help_params_delete_title">حذف پارامتر</string>
+    <string name="help_params_delete_body">با حذف یک پارامتر، برنامه دیگر آن را پاک نمی‌کند و به‌روزرسانی از اینترنت هم آن را دوباره اضافه نمی‌کند.\nاگر یک نام دقیق را حذف کنید، حتی وقتی نامی با ستاره مثل utm_* با آن جور باشد هم باقی می‌ماند.</string>
+    <string name="help_params_update_title">به‌روزرسانی و بازگردانی</string>
+    <string name="help_params_update_body">• دکمه‌ی به‌روزرسانی فهرست‌های آنلاین (GhostShare، AdGuard، ClearURLs) را می‌گیرد و فقط نام‌های تازه را اضافه می‌کند.\n• نام‌هایی که اغلب لینک را خراب می‌کنند، مثل id و q و v و p، وقتی از فهرست آنلاین بیایند نادیده گرفته می‌شوند.\n• دکمه‌ی بازگردانی فهرست پیش‌فرض را برمی‌گرداند و اضافه‌ها و حذف‌های شما را پاک می‌کند.</string>
+    <string name="help_params_priority_title">اولویت‌ها</string>
+    <string name="help_params_priority_body">۱. سایت‌های استثنا: هیچ چیزی در آن‌ها تغییر نمی‌کند.\n۲. قانون‌های سایت می‌توانند یک پارامتر را روی یک سایت نگه دارند.\n۳. این فهرست روی همه‌ی لینک‌های دیگر اعمال می‌شود.\nپارامترهای مهم یوتیوب (v، t، start، list، index) همیشه محافظت می‌شوند.</string>
+    <string name="title_exceptions_help">راهنمای سایت‌های استثنا</string>
+    <string name="help_exc_what_title">سایت استثنا چیست؟</string>
+    <string name="help_exc_what_body">وب‌سایتی که در این فهرست باشد کاملاً دست‌نخورده می‌ماند: لینک‌هایش پاک‌سازی نمی‌شوند و لینک‌های واسطه‌اش باز نمی‌شوند. زیردامنه‌ها هم شامل می‌شوند؛ مثلاً example.com برای www.example.com و app.example.com هم کار می‌کند.</string>
+    <string name="help_exc_add_title">افزودن سایت</string>
+    <string name="help_exc_add_body">فقط نام سایت را بنویسید، مثل example.com. اگر کل لینک را بچسبانید، نام سایت خودکار از آن جدا می‌شود.</string>
+    <string name="help_exc_when_title">کِی از آن استفاده کنم؟</string>
+    <string name="help_exc_when_body">وقتی یک سایت بعد از پاک‌سازی کار نمی‌کند، مثلاً صفحه‌های ورود، صفحه‌های پرداخت یا لینک‌های دانلود یک‌بارمصرف که پارامترهایشان باید بماند.</string>
+    <string name="help_exc_priority_title">اولویت‌ها</string>
+    <string name="help_exc_priority_body">این فهرست اول از همه بررسی می‌شود، قبل از قانون‌های سایت، پارامترها و قوانین ریدایرکت. اگر لینکی استثنا باشد، هیچ چیز دیگری روی آن اعمال نمی‌شود.</string>
+    <string name="help_exc_update_title">به‌روزرسانی و بازگردانی</string>
+    <string name="help_exc_update_body">دکمه‌ی به‌روزرسانی سایت‌ها را از فهرست آنلاین اضافه می‌کند. دکمه‌ی بازگردانی این فهرست را خالی می‌کند.</string>
+    <string name="title_redirect_help">راهنمای لینک‌های ریدایرکت</string>
+    <string name="help_redir_what_title">لینک ریدایرکت چیست؟</string>
+    <string name="help_redir_what_body">بعضی برنامه‌ها لینک واسطه می‌فرستند، مثل l.facebook.com/l.php?u=… یا google.com/url?q=…. این لینک‌ها قبل از رسیدن به صفحه‌ی اصلی از یک ردیاب رد می‌شوند. وقتی این قابلیت روشن باشد، برنامه مقصد واقعی را پیدا می‌کند، پاک‌سازی‌اش می‌کند و به‌جای لینک واسطه همان را برمی‌گرداند.</string>
+    <string name="help_redir_switch_title">سوییچ</string>
+    <string name="help_redir_switch_body">سوییچ بالای صفحه این قابلیت را روشن یا خاموش می‌کند. وقتی خاموش باشد، لینک‌های واسطه هرگز باز نمی‌شوند و فقط پاک‌سازی می‌شوند. قانون‌های شما ذخیره می‌مانند.</string>
+    <string name="help_redir_rule_title">قانون چیست؟</string>
+    <string name="help_redir_rule_body">هر قانون یک عبارت منظم (regex) است که مقصد را از داخل لینک واسطه پیدا می‌کند.\n• باید با ^http شروع شود.\n• باید دور آدرس مقصد یک گروه داخل پرانتز داشته باشد.\n• مثال: ^https?://l\\.example\\.com/\\?u=([^&amp;]+)\nمقصد از گروه اول خوانده می‌شود.</string>
+    <string name="help_redir_safety_title">ایمنی</string>
+    <string name="help_redir_safety_body">• قانون نامعتبر هنگام افزودن رد می‌شود و هنگام به‌روزرسانی نادیده گرفته می‌شود.\n• همه‌ی قانون‌ها روی هم برای هر لینک ۴۰ میلی‌ثانیه وقت دارند، پس یک قانون بد هرگز گوشی را قفل نمی‌کند.\n• لینک‌های واسطه‌ی تودرتو تا ۳ سطح باز می‌شوند.</string>
+    <string name="help_redir_update_title">به‌روزرسانی و بازگردانی</string>
+    <string name="help_redir_update_body">دکمه‌ی به‌روزرسانی قانون‌ها را از GhostShare و ClearURLs می‌گیرد و فقط تازه‌ها را اضافه می‌کند. دکمه‌ی بازگردانی قانون‌های پیش‌فرض را برمی‌گرداند و آن‌هایی که اضافه کرده‌اید را حذف می‌کند.</string>
 </resources>

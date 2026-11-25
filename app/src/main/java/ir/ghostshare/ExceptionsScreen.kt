@@ -36,6 +36,7 @@ fun ExceptionsScreen(
 ) {
     var showAdd by remember { mutableStateOf(false) }
     var showRestore by remember { mutableStateOf(false) }
+    var showHelp by remember { mutableStateOf(false) }
     val removal = rememberRemovalState()
     val domains = config.exceptionDomains.sorted()
 
@@ -79,10 +80,31 @@ fun ExceptionsScreen(
         )
     }
 
+    if (showHelp) {
+        GuideDialog(
+            title = R.string.title_exceptions_help,
+            sections = listOf(
+                GuideSection(R.string.help_exc_what_title, R.string.help_exc_what_body),
+                GuideSection(R.string.help_exc_add_title, R.string.help_exc_add_body),
+                GuideSection(R.string.help_exc_when_title, R.string.help_exc_when_body),
+                GuideSection(R.string.help_exc_priority_title, R.string.help_exc_priority_body),
+                GuideSection(R.string.help_exc_update_title, R.string.help_exc_update_body),
+                GuideSection(R.string.help_rules_test_title, R.string.help_rules_test_body)
+            ),
+            onDismiss = { showHelp = false }
+        )
+    }
+
     ScreenScaffold(
         title = stringResource(R.string.title_exceptions),
         onBack = onBack,
         actions = {
+            IconButton(onClick = { showHelp = true }) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_help),
+                    contentDescription = stringResource(R.string.cd_help)
+                )
+            }
             IconButton(onClick = onOpenSources) {
                 Icon(
                     painter = painterResource(R.drawable.ic_sync),

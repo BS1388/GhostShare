@@ -9,16 +9,22 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.provider.Settings
+import android.view.Gravity
 import android.view.HapticFeedbackConstants
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowInsetsController
+import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ListPopupWindow
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -33,13 +39,15 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 open class MainActivity : AppCompatActivity() {
 
     private lateinit var layoutStatusBadge: LinearLayout
+    private lateinit var layoutLogoBox: View
     private lateinit var tvStatusBadge: TextView
     private lateinit var ivStatusDot: ImageView
     private lateinit var switchNotification: Switch
     private lateinit var cardGithub: LinearLayout
 
-    private lateinit var btnLangFa: TextView
-    private lateinit var btnLangEn: TextView
+    private lateinit var layoutLanguagePill: View
+    private lateinit var ivLanguageFlag: ImageView
+    private lateinit var tvLanguageName: TextView
 
     private lateinit var notificationPermissionLauncher: ActivityResultLauncher<String>
 
@@ -66,10 +74,6 @@ open class MainActivity : AppCompatActivity() {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
     }
 
-    open fun isModuleActive(): Boolean {
-        return false
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -94,23 +98,16 @@ open class MainActivity : AppCompatActivity() {
         setupSystemBars()
 
         layoutStatusBadge = findViewById(R.id.layout_status_badge)
+        layoutLogoBox = findViewById(R.id.layout_logo_box)
         tvStatusBadge = findViewById(R.id.tv_status_badge)
         ivStatusDot = findViewById(R.id.iv_status_dot)
         switchNotification = findViewById(R.id.switch_restore_notification)
         cardGithub = findViewById(R.id.card_github)
 
-        btnLangFa = findViewById(R.id.btn_lang_fa)
-        btnLangEn = findViewById(R.id.btn_lang_en)
-
-        updateLanguageSelectorUI(LocaleHelper.getLanguage(this))
-
-        btnLangFa.setOnClickListener {
-            onLanguageButtonClicked(LocaleHelper.LANG_FA)
-        }
-
-        btnLangEn.setOnClickListener {
-            onLanguageButtonClicked(LocaleHelper.LANG_EN)
-        }
+        layoutLanguagePill = findViewById(R.id.layout_language_pill)
+        ivLanguageFlag = findViewById(R.id.iv_language_flag)
+        tvLanguageName = findViewById(R.id.tv_language_name)
+        setupLanguageDropdown()
 
         cardGithub.clipToOutline = true
 
@@ -161,7 +158,6 @@ open class MainActivity : AppCompatActivity() {
 
             if (isChecked) {
                 setNotificationEnabled(enabled = true, showToast = true)
-
                 if (!isNotificationPermissionGranted()) {
                     showNotificationPermissionDialog()
                 }
@@ -206,7 +202,6 @@ open class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         setupSystemBars()
-
         lastStatusState?.let { renderStatus(it, animateTransition = false) }
     }
 
@@ -251,23 +246,67 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun flagFor(lang: String): Int =
+        if (lang == LocaleHelper.LANG_FA) R.drawable.flag_fa else R.drawable.flag_en
+
+    private fun nameFor(lang: String): Int =
+        if (lang == LocaleHelper.LANG_FA) R.string.lang_persian else R.string.lang_english
+
+    private fun setupLanguageDropdown() {
+        val currentLang = LocaleHelper.getLanguage(this)
+        ivLanguageFlag.setImageResource(flagFor(currentLang))
+        tvLanguageName.setText(nameFor(currentLang))
+        layoutLanguagePill.setOnClickListener { showLanguageMenu(currentLang) }
+    }
+
+    private fun showLanguageMenu(currentLang: String) {
+        val options = listOf(LocaleHelper.LANG_FA, LocaleHelper.LANG_EN)
+
+        val popup = ListPopupWindow(this)
+        popup.anchorView = layoutLanguagePill
+        popup.width = (resources.displayMetrics.density * 200).toInt()
+        popup.isModal = true
+        popup.setBackgroundDrawable(getDrawable(R.drawable.bg_m3_card))
+        popup.setDropDownGravity(Gravity.END)
+        popup.setAdapter(object : BaseAdapter() {
+            override fun getCount(): Int = options.size
+            override fun getItem(position: Int): Any = options[position]
+            override fun getItemId(position: Int): Long = position.toLong()
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val row = convertView ?: LayoutInflater.from(parent.context).inflate(R.layout.item_language, parent, false)
+                val lang = options[position]
+                val selected = lang == currentLang
+                row.findViewById<ImageView>(R.id.iv_item_flag).setImageResource(flagFor(lang))
+                val name = row.findViewById<TextView>(R.id.tv_item_name)
+                name.setText(nameFor(lang))
+                name.setTypeface(null, if (selected) Typeface.BOLD else Typeface.NORMAL)
+                name.setTextColor(getColor(if (selected) R.color.m3_sys_color_primary else R.color.m3_sys_color_on_surface))
+                return row
+            }
+        })
+        popup.setOnItemClickListener { _, _, position, _ ->
+            popup.dismiss()
+            onLanguageButtonClicked(options[position])
+        }
+        popup.show()
+    }
+
     private fun onLanguageButtonClicked(targetLang: String) {
         val currentLang = LocaleHelper.getLanguage(this)
         if (currentLang == targetLang) {
-            btnLangFa.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            layoutLanguagePill.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             return
         }
 
         try {
-            btnLangFa.performHapticFeedback(
+            layoutLanguagePill.performHapticFeedback(
                 HapticFeedbackConstants.KEYBOARD_TAP,
                 HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
             )
         } catch (_: Throwable) {
-            btnLangFa.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            layoutLanguagePill.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
         }
 
-        updateLanguageSelectorUI(targetLang)
         LocaleHelper.setLanguage(this, targetLang)
 
         val targetCtx = LocaleHelper.getLocalizedContext(this, targetLang)
@@ -278,26 +317,7 @@ open class MainActivity : AppCompatActivity() {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
-    private fun updateLanguageSelectorUI(currentLang: String) {
-        val isFa = currentLang == LocaleHelper.LANG_FA
-
-        btnLangFa.setBackgroundResource(
-            if (isFa) R.drawable.bg_m3_segment_active else R.drawable.bg_m3_segment_inactive
-        )
-        btnLangFa.setTextColor(
-            getColor(if (isFa) R.color.m3_sys_color_on_primary_container else R.color.m3_sys_color_on_surface_variant)
-        )
-
-        btnLangEn.setBackgroundResource(
-            if (!isFa) R.drawable.bg_m3_segment_active else R.drawable.bg_m3_segment_inactive
-        )
-        btnLangEn.setTextColor(
-            getColor(if (!isFa) R.color.m3_sys_color_on_primary_container else R.color.m3_sys_color_on_surface_variant)
-        )
-    }
-
     private fun isNotificationPermissionGranted(): Boolean {
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissionCheck = ContextCompat.checkSelfPermission(
                 this,
@@ -422,7 +442,6 @@ open class MainActivity : AppCompatActivity() {
         if (isNotificationPermissionGranted()) {
             setNotificationEnabled(enabled = true, showToast = true)
         } else {
-
             openAppNotificationSettings()
         }
     }
@@ -466,7 +485,6 @@ open class MainActivity : AppCompatActivity() {
     private fun onStatusBadgeClicked() {
         val now = SystemClock.elapsedRealtime()
         if (now - lastCheckTimestamp < 1200L || isCheckingInProgress) {
-
             return
         }
         lastCheckTimestamp = now
@@ -519,7 +537,6 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun checkModuleStatus(silent: Boolean) {
-        val directHookActive = isModuleActive()
         val intent = Intent(Constants.ACTION_CHECK_STATUS).setPackage("android")
 
         try {
@@ -532,7 +549,7 @@ open class MainActivity : AppCompatActivity() {
                             return
                         }
                         val systemServerActive = resultCode == RESULT_OK
-                        applyStatus(directHookActive, systemServerActive, animateTransition = !silent)
+                        applyStatus(systemServerActive, animateTransition = !silent)
                         isCheckingInProgress = false
                     }
                 },
@@ -543,18 +560,14 @@ open class MainActivity : AppCompatActivity() {
             )
         } catch (_: Throwable) {
             if (!isFinishing && (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 || !isDestroyed)) {
-                applyStatus(directHookActive, false, animateTransition = !silent)
+                applyStatus(false, animateTransition = !silent)
             }
             isCheckingInProgress = false
         }
     }
 
-    private fun applyStatus(directHookActive: Boolean, systemServerActive: Boolean, animateTransition: Boolean) {
-        val newState = when {
-            systemServerActive -> StatusState.ACTIVE
-            directHookActive -> StatusState.NEEDS_REBOOT
-            else -> StatusState.INACTIVE
-        }
+    private fun applyStatus(systemServerActive: Boolean, animateTransition: Boolean) {
+        val newState = if (systemServerActive) StatusState.ACTIVE else StatusState.INACTIVE
 
         renderStatus(newState, animateTransition)
     }
@@ -564,6 +577,7 @@ open class MainActivity : AppCompatActivity() {
         lastStatusState = state
 
         val bgRes: Int
+        val logoBgRes: Int
         val textRes: Int
         val textColorRes: Int
         val dotColorRes: Int
@@ -571,18 +585,21 @@ open class MainActivity : AppCompatActivity() {
         when (state) {
             StatusState.ACTIVE -> {
                 bgRes = R.drawable.bg_m3_badge_active
+                logoBgRes = R.drawable.bg_m3_logo_box_active
                 textRes = R.string.status_active
                 textColorRes = R.color.m3_sys_color_on_success_container
                 dotColorRes = R.color.m3_sys_color_success
             }
             StatusState.NEEDS_REBOOT -> {
                 bgRes = R.drawable.bg_m3_badge_warning
+                logoBgRes = R.drawable.bg_m3_logo_box_warning
                 textRes = R.string.status_needs_reboot
                 textColorRes = R.color.m3_sys_color_on_warning_container
                 dotColorRes = R.color.m3_sys_color_warning
             }
             StatusState.INACTIVE -> {
                 bgRes = R.drawable.bg_m3_badge_inactive
+                logoBgRes = R.drawable.bg_m3_logo_box_inactive
                 textRes = R.string.status_inactive
                 textColorRes = R.color.m3_sys_color_on_error_container
                 dotColorRes = R.color.m3_sys_color_error
@@ -591,6 +608,7 @@ open class MainActivity : AppCompatActivity() {
 
         if (!stateChanged && !animateTransition) {
             layoutStatusBadge.setBackgroundResource(bgRes)
+            layoutLogoBox.setBackgroundResource(logoBgRes)
             tvStatusBadge.setText(textRes)
             tvStatusBadge.setTextColor(getColor(textColorRes))
             ivStatusDot.setColorFilter(getColor(dotColorRes))
@@ -598,12 +616,12 @@ open class MainActivity : AppCompatActivity() {
         }
 
         if (stateChanged && animateTransition) {
-
             layoutStatusBadge.animate()
                 .alpha(0.6f)
                 .setDuration(100L)
                 .withEndAction {
                     layoutStatusBadge.setBackgroundResource(bgRes)
+                    layoutLogoBox.setBackgroundResource(logoBgRes)
                     tvStatusBadge.setText(textRes)
                     tvStatusBadge.setTextColor(getColor(textColorRes))
                     ivStatusDot.setColorFilter(getColor(dotColorRes))
@@ -614,6 +632,7 @@ open class MainActivity : AppCompatActivity() {
                 }.start()
         } else {
             layoutStatusBadge.setBackgroundResource(bgRes)
+            layoutLogoBox.setBackgroundResource(logoBgRes)
             tvStatusBadge.setText(textRes)
             tvStatusBadge.setTextColor(getColor(textColorRes))
             ivStatusDot.setColorFilter(getColor(dotColorRes))
